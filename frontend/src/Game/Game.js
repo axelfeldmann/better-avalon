@@ -32,43 +32,6 @@ class Game extends Component {
         }
     }
 
-    async action(type) {
-        var headers = {
-            "Authorization" : `Bearer ${auth0Client.getIdToken()}`
-        };
-        await axios.post("http://localhost:8081/action", { type }, { headers });
-    }
-
-    renderControls() {
-        let controls = []
-        const { gameState } = this.state;
-        const { nickname  } = auth0Client.getProfile();
-
-        const isHost = (nickname === gameState.host);
-        if (isHost) {
-            controls.push(
-                <button onClick={() => {this.action("END")}}>
-                    end game
-                </button>
-            );
-        }
-        if (isHost && gameState.status === "WAITING") {
-            controls.push(
-                <button onClick={() => {this.action("START")}}>
-                    start game
-                </button>
-            );
-        }
-        if (!isHost && gameState.status === "WAITING") {
-            controls.push(
-                <button onClick={() => {this.action("LEAVE")}}>
-                    leave game
-                </button>
-            );
-        }
-        return controls;
-    }
-
     renderGame() {
         const { gameState } = this.state;
         console.log(gameState);
