@@ -5,6 +5,7 @@ import NavBar from './NavBar/NavBar';
 import Lobby from './Lobby/Lobby';
 import Callback from './Callback';
 import SecuredRoute from './SecuredRoute/SecuredRoute';
+import Game from "./Game/Game";
 
 class App extends Component {
   constructor(props) {
@@ -32,7 +33,9 @@ class App extends Component {
     return (
       <div>
         <NavBar/>
-        <SecuredRoute exact path='/' component={Lobby}
+        <SecuredRoute path="/" component={Lobby}
+            checkingSession={this.state.checkingSession}/>
+        <SecuredRoute path="/game" component={Game}
             checkingSession={this.state.checkingSession}/>
         <Route exact path="/callback" component={Callback}/>
       </div>

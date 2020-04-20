@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import auth0Client from "../Auth";
+import { withRouter } from "react-router-dom";
 
 class Lobby extends Component {
     constructor(props) {
@@ -16,10 +17,9 @@ class Lobby extends Component {
         var headers = {
             "Authorization": `Bearer ${auth0Client.getIdToken()}`
         };
-        const games = (await axios.get("http://localhost:8081/games/",
+        const games = (await axios.get("http://localhost:8081/games",
             { headers }
         )).data;
-        console.log(games);
         this.setState({
             games,
         });
@@ -32,8 +32,9 @@ class Lobby extends Component {
         await axios.post("http://localhost:8081/newgame", {
         }, {
             headers: { "Authorization": `Bearer ${auth0Client.getIdToken()}` }
-        });
-
+        }).then(
+            () => this.props.history.push("/game")
+        );
     }
 
     render() {
@@ -56,4 +57,4 @@ class Lobby extends Component {
     }
 }
 
-export default Lobby;
+export default withRouter(Lobby);
