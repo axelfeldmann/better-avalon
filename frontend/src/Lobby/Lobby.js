@@ -17,7 +17,7 @@ class Lobby extends Component {
         var headers = {
             "Authorization": `Bearer ${auth0Client.getIdToken()}`
         };
-        await axios.get("http://localhost:8081/games", { headers }
+        await axios.get("/games", { headers }
         )
         .then(response => {
             this.setState({
@@ -34,7 +34,7 @@ class Lobby extends Component {
         this.setState({
             buttonsDisabled: true
         });
-        await axios.post("http://localhost:8081/newgame", {
+        await axios.post("/newgame", {
         }, {
             headers: { "Authorization": `Bearer ${auth0Client.getIdToken()}` }
         }).then(
@@ -46,7 +46,7 @@ class Lobby extends Component {
         this.setState({
             buttonsDisabled: true
         });
-        await axios.post("http://localhost:8081/joingame", {
+        await axios.post("/joingame", {
             host : host
         }, {
             headers: { "Authorization": `Bearer ${auth0Client.getIdToken()}` }

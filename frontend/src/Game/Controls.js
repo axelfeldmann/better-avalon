@@ -108,7 +108,7 @@ class Controls extends Component {
 	        "Authorization": `Bearer ${auth0Client.getIdToken()}`
 	    };
 	    this.setState({ buttonsDisabled : true });
-	    axios.post("http://localhost:8081/action", { type, arg }, { headers }).then(() => {
+	    axios.post("/action", { type, arg }, { headers }).then(() => {
 	    	this.setState( {buttonsDisabled : false });
 	    })
 	}
@@ -118,7 +118,7 @@ class Controls extends Component {
 	        "Authorization": `Bearer ${auth0Client.getIdToken()}`
 	    };
 		this.setState({ buttonsDisabled : true });
-		axios.post("http://localhost:8081/leavegame", {}, { headers }).then(() => {
+		axios.post("/leavegame", {}, { headers }).then(() => {
 			this.props.history.push("/");
 		});
 	}
@@ -128,7 +128,7 @@ class Controls extends Component {
 	        "Authorization": `Bearer ${auth0Client.getIdToken()}`
 	    };
 		this.setState({ buttonsDisabled : true });
-		axios.post("http://localhost:8081/endgame", {}, { headers }).then(() => {
+		axios.post("/endgame", {}, { headers }).then(() => {
 			this.props.history.push("/");
 		});
 	}
