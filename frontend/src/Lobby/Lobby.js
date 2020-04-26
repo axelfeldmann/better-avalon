@@ -9,7 +9,7 @@ class Lobby extends Component {
 
         this.state = {
             games: null,
-            buttonDisabled: false
+            buttonsDisabled: false
         };
     }
 
@@ -17,19 +17,37 @@ class Lobby extends Component {
         var headers = {
             "Authorization": `Bearer ${auth0Client.getIdToken()}`
         };
-        const games = (await axios.get("http://localhost:8081/games",
-            { headers }
-        )).data;
-        this.setState({
-            games,
-        });
+        await axios.get("http://localhost:8081/games", { headers }
+        )
+        .then(response => {
+            this.setState({
+                games : response.data
+            });
+        })
+        .catch(error => {
+            this.props.history.push("/game");
+        })
+
     }
 
-    async submit() {
+    async newgame() {
         this.setState({
-            buttonDisabled: true
+            buttonsDisabled: true
         });
         await axios.post("http://localhost:8081/newgame", {
+        }, {
+            headers: { "Authorization": `Bearer ${auth0Client.getIdToken()}` }
+        }).then(
+            () => this.props.history.push("/game")
+        );
+    }
+
+    async joingame(host) {
+        this.setState({
+            buttonsDisabled: true
+        });
+        await axios.post("http://localhost:8081/joingame", {
+            host : host
         }, {
             headers: { "Authorization": `Bearer ${auth0Client.getIdToken()}` }
         }).then(
@@ -44,11 +62,21 @@ class Lobby extends Component {
                 { this.state.games === null 
                     ? <p> loading games... </p>
                     : this.state.games.map((game, idx) => 
-                        (<div key={idx}> {game.host}</div>))
+                        (
+                            <div key={idx}> 
+                                <button
+                                    key={game.host}
+                                    onClick={() => this.joingame(game.host)}
+                                    disabled={this.state.buttonsDisabled}
+                                >
+                                    join {game.host}'s game
+                                </button>
+                            </div>
+                        ))
                 }
                 <button
-                    onClick={() => {this.submit()}}
-                    disabled={this.state.buttonDisabled}
+                    onClick={() => {this.newgame()}}
+                    disabled={this.state.buttonsDisabled}
                 > 
                     new game 
                 </button>

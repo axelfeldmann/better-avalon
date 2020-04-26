@@ -8,130 +8,17 @@ const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const assert = require("assert");
 
+const Game = require("./game.js");
+
 // define the Express app
 const app = express();
 
 let games = new Map(); // host -> game (new games are stored here)
 let playerToGame = new Map();
-let globId = 0;
 
-function send(con, obj) {
-    con.write(`data: ${JSON.stringify(obj)}`);
-    con.write("\n\n");
-}
-
-class Game {
-    constructor(host) {
-        this.host = host;
-        this.players = new Map();
-        this.players.set(host, {});
-        this.id = globId++;
-        this.status = "WAITING";
-    }
-
-    state(name) {
-        const playerObj = this.players.get(name);
-        assert(playerObj);
-        return {
-            host: this.host,
-            players: [ ...this.players.keys() ],
-            id: this.id,
-            status: this.status,
-            role: playerObj.role
-        };
-    }
-
-    newCon(name, res) {
-        // THE PLAYER IS NOT ADDED IN HERE!
-        let player = this.players.get(name);
-        assert(player);
-        player.con = res;
-        send(res, this.state(name));
-    }
-
-
-    dropCon(name) {
-        let player = this.players.get(name);
-        assert(player);
-        player.con = null;
-    }
-
-    handleAction(requester, request, resp) {
-        switch (request.type) {
-            case "END":
-                this.end(requester, request, resp);
-                break;
-            case "START":
-                this.start(requester, request, resp);
-                break;
-            case "PROPOSE":
-                this.propose(requester, request, resp);
-                break;
-            case "LADY":
-                this.lady(requester, request, resp);
-                break;
-            case "VOTE":
-                this.vote(requester, request, resp);
-                break;
-            case "MISSION":
-                this.mission(requester, request, resp);
-                break;
-        }
-    }
-
-    end(requester, request, resp) {
-        if (requester != this.host) {
-            resp.send(401);
-            return;
-        }
-        console.log("ending game hosted by " + this.host);
-        this.players.forEach((playerObj, name) => {
-            assert(playerToGame.get(name) === this);
-            playerToGame.delete(name);
-            playerObj.con.close();
-        });
-        assert(games.get(this.host) === this);
-        games.delete(this.host);
-        this.status = "CLOSED";
-        // no trace left
-    }
-
-    issueRoles() {
-        // TEMP
-        this.players.forEach((playerObj, name) => {
-            playerObj.role = "oberon";
-        });
-    }
-
-    generateOrder() {
-        this.order = []
-    }
-
-    start(requester, request, resp) {
-        if (requester != this.host) {
-            resp.send(401);
-            return;
-        }
-        console.log("starting game hosted by " + this.host);
-        this.issueRoles();
-        this.generateOrder();
-        this.missionIdx = 0;
-        this.status = "PROPOSING";
-        this.turn = order[0];
-        this.lady = order[0]; // this is fake news
-    }
-};
-
-// enhance your app security with Helmet
 app.use(helmet());
-
-// use bodyParser to parse application/json content-type
 app.use(bodyParser.json());
-
-// enable all CORS requests
 app.use(cors());
-
-// log HTTP requests
 app.use(morgan('combined'));
 
 const checkJwt = jwt({
@@ -151,10 +38,18 @@ const checkJwt = jwt({
 // retrieve all questions
 app.get("/games", checkJwt, (req, res) => {
 
+    console.log("games");
+    const name = req.user.nickname;
+    const game = playerToGame.get(name);
+    if (game) {
+        res.send(400);
+        return;
+    }
+
     // TODO: check if player is currently in game... react appropriately
     let gs = []
     games.forEach((game, host) => {
-        if (game.status = "WAITING") {
+        if (game.acceptingPlayers()) {
             gs.push({
                 host: game.host,
                 id: game.id,
@@ -170,7 +65,10 @@ app.get("/mygame", checkJwt, (req, res) => {
     console.log("mygame");
     const name = req.user.nickname;
     const game = playerToGame.get(name);
-    assert(game);
+    if (!game) {
+        res.send(400);
+        return;
+    }
 
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Content-Type", "text/event-stream");
@@ -189,6 +87,7 @@ app.post("/action", checkJwt, (req, res) => {
     const name = req.user.nickname;
     let game = playerToGame.get(name);
     game.handleAction(name, req.body, res);
+    res.send();
 });
 
 app.post("/newgame", checkJwt, (req, res) => {
@@ -200,6 +99,51 @@ app.post("/newgame", checkJwt, (req, res) => {
     const game = new Game(name);
     games.set(name, game);
     playerToGame.set(name, game);
+    res.send();
+});
+
+app.post("/joingame", checkJwt, (req, res) => {
+    const host = req.body.host;
+    const name = req.user.nickname;
+    const game = games.get(host);
+    console.log(host);
+    assert(game);
+    assert(!playerToGame.has(name));
+    if (game.addPlayer(name)) {
+        playerToGame.set(name, game);
+        res.send();
+    } else {
+        res.send(400);
+    }
+});
+
+app.post("/endgame", checkJwt, (req, res) => {
+    console.log("endgame");
+    const host = req.user.nickname;
+    const game = games.get(host);
+    if (!game) {
+        res.send(400);
+    }
+
+    game.players.forEach((playerObj, name) => {
+        assert(playerToGame.has(name));
+        playerToGame.delete(name);
+        playerObj.con.end();
+    });
+    games.delete(host);
+    res.send();
+
+});
+
+app.post("/leavegame", checkJwt, (req, res) => {
+    console.log("leavegame");
+    const name = req.user.nickname;
+    const game = playerToGame.get(name);
+    if (!game || !game.removePlayer(name)) {
+        res.send(400);
+        return;
+    }
+    playerToGame.delete(name);
     res.send();
 });
 

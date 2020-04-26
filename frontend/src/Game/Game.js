@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import axios from "axios";
 import auth0Client from "../Auth";
 import { withRouter } from "react-router-dom";
 import { EventSourcePolyfill } from 'event-source-polyfill';
-import GameDisplay from "./GameDisplay";
+import GameState from "./GameState";
 import Controls from "./Controls";
+import Message from "./Message";
 
 class Game extends Component {
 
@@ -27,19 +27,28 @@ class Game extends Component {
     }
 
     componentDidMount() {
+        this.eventSource.onerror = (error) => {
+            this.props.history.push("/");
+        }
         this.eventSource.onmessage = (event) => {
-            this.updateGameState(JSON.parse(event.data));
+            const json = JSON.parse(event.data);
+            this.updateGameState(json);
         }
     }
 
+    componentWillUnmount() {
+        this.eventSource.close();
+    }
+
     renderGame() {
-        const { gameState } = this.state;
+        const gameState = this.state.gameState;
         console.log(gameState);
         return (
             <div className = "game">
                 <h2 className = "title"> { gameState.host }'s game </h2>
+                <Message gameState = { gameState }/>
                 <Controls gameState = { gameState }/>
-                <GameDisplay gameState = { gameState }/>
+                <GameState gameState = { gameState }/>
             </div>
         );
     }
