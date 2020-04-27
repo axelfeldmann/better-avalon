@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const assert = require("assert");
+const path = require("path");
 
 const Game = require("./game.js");
 
@@ -26,14 +27,16 @@ const checkJwt = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://bk-tmp.auth0.com/.well-known/jwks.json`
+    jwksUri: `https://axelfeldmann.auth0.com/.well-known/jwks.json`
   }),
 
   // Validate the audience and the issuer.
-  audience: 'PVafIu9Q5QN65DiPByAFvCCJryY7n432',
-  issuer: `https://bk-tmp.auth0.com/`,
+  audience: 'fxwSJvednKT8LMzYjMXnKrdAhiaVH3o4',
+  issuer: `https://axelfeldmann.auth0.com/`,
   algorithms: ['RS256']
 });
+
+
 
 // retrieve all questions
 app.get("/games", checkJwt, (req, res) => {
@@ -145,6 +148,13 @@ app.post("/leavegame", checkJwt, (req, res) => {
     }
     playerToGame.delete(name);
     res.send();
+});
+
+app.use(express.static(path.join(__dirname, "../../frontend/build")));
+
+app.use((req, res) => {
+    const p = path.join(__dirname, "../../frontend/build/index.html");
+    res.sendFile(p);
 });
 
 // start the server
