@@ -31,9 +31,9 @@ const Mission = ({ event, active, totalPlayers }) => {
 		case "HAPPENING":
 			return (<div> {missionDesc}, {missionResponses}/{numPlayers} responses received </div>);
 		case "FAILED":
-			return (<div> {missionDesc}, failed with {fails} </div>);
+			return (<div> {missionDesc}, failed with {fails} fails </div>);
 		case "PASSED":
-			return (<div> {missionDesc}, passed </div>);
+			return (<div> {missionDesc}, passed with {fails} fails </div>);
 		default:
 			return (<div> MISSION </div>);
 	}

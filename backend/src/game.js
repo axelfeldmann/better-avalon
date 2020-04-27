@@ -130,23 +130,69 @@ function roleSees(role){
     }
 }
 
+class Nicknames {
+    constructor(){
+        this.toNickname = new Map();
+        this.toUsername = new Map();
+    }
+
+    setNickname(username, nickname){
+        this.toNickname.set(username, nickname);
+        this.toUsername.set(nickname, username);
+    }
+
+    getNickname(username){
+        const nickname = this.toNickname.get(username);
+        return nickname;
+    }
+
+    getUsername(nickname){
+        const username = this.toUsername.get(nickname);
+        return username;
+    }
+
+    deleteNickname(username){
+        const nickname = this.toNickname(username);
+        this.toNickname.delete(username);
+        this.toUsername.delete(nickname);
+    }
+
+}
+
 function isBad(role) {
     const badPeople = ["MORGANA", "MORDRED", "BAD LANCELOT", "OBERON", "BROBERON", "BAD TOWNIE"];
     return badPeople.includes(role);
 }
 
+
+
 module.exports = class Game {
-    constructor(host) {
+    constructor(host, nickname) {
         this.host = host;
         this.players = new Map();
         this.state = { gameState : "WAITING" };
-        this.addPlayer(host);
+        this.nicknames = new Nicknames();
     }
 
-    addPlayer(name) {
+    validNickname(nickname){
+        return (nickname.length) > 4 && (nickname.length < 15);
+    }
+
+    addPlayer(name, nickname) {
+        if (!this.validNickname(nickname)){
+            return false;
+        }
         if (this.state.gameState != "WAITING") {
             return false;
         }
+        if (this.nicknames.getUsername(nickname)){
+            return false;
+        }
+
+        assert(!this.nicknames.getNickname(name));
+
+        this.nicknames.setNickname(name, nickname);
+
         this.players.set(name, { con: null });
         this.broadcast();
         return true;
@@ -157,6 +203,7 @@ module.exports = class Game {
         if (this.host === name) {
             return false;
         }
+        this.nicknames.deleteNickname(name);
         this.players.delete(name);
         this.broadcast();
         return true;
@@ -171,6 +218,7 @@ module.exports = class Game {
     }
 
     newCon(name, res) {
+        console.log(name);
         let player = this.players.get(name);
         assert(player);
         player.con = res;
@@ -240,6 +288,7 @@ module.exports = class Game {
                 const otherPlayerRole = this.state.playerRoles.get(otherPlayer);
                 return seenRoles.includes(otherPlayerRole);
             });
+            seenPlayers = seenPlayers.map(username => this.nicknames.getNickname(username));
             let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.toString() : "no one";
             let msg = "your role is " + role + "\nyou see: " + seenPlayersStr;
             this.state.messages.set(name, msg);
@@ -248,6 +297,9 @@ module.exports = class Game {
     }
 
     handleProposal(proposer, proposal) {
+        console.log("before", proposal);
+        proposal = proposal.map(nickname => this.nicknames.getUsername(nickname));
+        console.log("after", proposal);
         const turn = this.state.order[this.state.turnIdx];
         if (turn !== proposer || this.state.gameState !== "PROPOSING") return false;
         const mission = this.state.events[this.state.eventIdx];
@@ -312,9 +364,9 @@ module.exports = class Game {
         mission.votesReceived += 1;
         if (vote === "YES") {
             mission.votesFor += 1;
-            this.state.votersFor.push(voter);
+            this.state.votersFor.push(this.nicknames.getNickname(voter));
         } else {
-            this.state.votersAgainst.push(voter);
+            this.state.votersAgainst.push(this.nicknames.getNickname(voter));
         }
         this.state.waiting = this.state.waiting.filter(player => player !== voter);
 
@@ -451,13 +503,13 @@ module.exports = class Game {
         if (this.state.gameState === "WAITING") {
             return { 
                 host: this.host, 
-                players: [ ...this.players.keys() ], 
+                players: [ ...this.players.keys() ].map(player => this.nicknames.getNickname(player)), 
                 state: this.state.gameState
             };
         } else {
             return {
                 host: this.host,
-                players: this.state.order,
+                players: this.state.order.map(player => this.nicknames.getNickname(player)),
                 state: this.state.gameState,
                 turnIdx: this.state.turnIdx,
                 lady: this.state.lady,

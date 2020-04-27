@@ -96,10 +96,14 @@ app.post("/action", checkJwt, (req, res) => {
 app.post("/newgame", checkJwt, (req, res) => {
     
     const name = req.user.nickname;
+    const nickname = req.body.nickname;
     assert(!playerToGame.has(name));
     assert(!games.has(name));
 
     const game = new Game(name);
+    if (!game.addPlayer(name, nickname)){
+        res.send(400);
+    }
     games.set(name, game);
     playerToGame.set(name, game);
     res.send();
@@ -108,11 +112,12 @@ app.post("/newgame", checkJwt, (req, res) => {
 app.post("/joingame", checkJwt, (req, res) => {
     const host = req.body.host;
     const name = req.user.nickname;
+    const nickname = req.body.nickname;
     const game = games.get(host);
     console.log(host);
     assert(game);
     assert(!playerToGame.has(name));
-    if (game.addPlayer(name)) {
+    if (game.addPlayer(name, nickname)) {
         playerToGame.set(name, game);
         res.send();
     } else {
