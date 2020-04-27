@@ -16,12 +16,7 @@ class Game extends Component {
         };
 
         // this is terrible but necessary for decent development
-        console.log(window.location.host);
-        if (window.location.host === "localhost:3000") {
-            this.eventSource = new EventSourcePolyfill("http://localhost:8081/mygame", { headers });
-        } else {
-            this.eventSource = new EventSourcePolyfill("/mygame", { headers });
-        }
+        this.eventSource = new EventSourcePolyfill("/api/mygame", { headers });
 
         this.state = {
             gameState: null

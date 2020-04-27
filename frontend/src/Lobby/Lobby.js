@@ -24,7 +24,7 @@ class Lobby extends Component {
         var headers = {
             "Authorization": `Bearer ${auth0Client.getIdToken()}`
         };
-        await axios.get("/games", { headers }
+        await axios.get("/api/games", { headers }
         )
         .then(response => {
             this.setState({
@@ -32,7 +32,14 @@ class Lobby extends Component {
             });
         })
         .catch(error => {
-            this.props.history.push("/game");
+            console.log(error);
+            if (error.response.status === 400) {
+                this.props.history.push("/game");
+            } else {
+                this.setState({
+                    banner : "could not connect to server"
+                });
+            }
         })
 
     }
@@ -45,7 +52,7 @@ class Lobby extends Component {
         this.setState({
             buttonsDisabled: true
         });
-        await axios.post("/newgame", {
+        await axios.post("/api/newgame", {
             nickname : this.state.nickname
         }, {
             headers: { "Authorization": `Bearer ${auth0Client.getIdToken()}` }
@@ -69,7 +76,7 @@ class Lobby extends Component {
         this.setState({
             buttonsDisabled: true
         });
-        await axios.post("/joingame", {
+        await axios.post("/api/joingame", {
             host : host,
             nickname : this.state.nickname
         }, {

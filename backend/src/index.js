@@ -39,7 +39,7 @@ const checkJwt = jwt({
 
 
 // retrieve all questions
-app.get("/games", checkJwt, (req, res) => {
+app.get("/api/games", checkJwt, (req, res) => {
 
     console.log("games");
     const name = req.user.nickname;
@@ -64,7 +64,7 @@ app.get("/games", checkJwt, (req, res) => {
 });
 
 // should establish a streaming connection with the server
-app.get("/mygame", checkJwt, (req, res) => {
+app.get("/api/mygame", checkJwt, (req, res) => {
     console.log("mygame");
     const name = req.user.nickname;
     const game = playerToGame.get(name);
@@ -73,7 +73,7 @@ app.get("/mygame", checkJwt, (req, res) => {
         return;
     }
 
-    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Cache-Control", "no-transform");
     res.setHeader("Content-Type", "text/event-stream");
     res.flushHeaders();
     
@@ -86,14 +86,14 @@ app.get("/mygame", checkJwt, (req, res) => {
     game.newCon(name, res);
 });
 
-app.post("/action", checkJwt, (req, res) => {
+app.post("/api/action", checkJwt, (req, res) => {
     const name = req.user.nickname;
     let game = playerToGame.get(name);
     game.handleAction(name, req.body, res);
     res.send();
 });
 
-app.post("/newgame", checkJwt, (req, res) => {
+app.post("/api/newgame", checkJwt, (req, res) => {
     
     const name = req.user.nickname;
     const nickname = req.body.nickname;
@@ -109,7 +109,7 @@ app.post("/newgame", checkJwt, (req, res) => {
     res.send();
 });
 
-app.post("/joingame", checkJwt, (req, res) => {
+app.post("/api/joingame", checkJwt, (req, res) => {
     const host = req.body.host;
     const name = req.user.nickname;
     const nickname = req.body.nickname;
@@ -125,7 +125,7 @@ app.post("/joingame", checkJwt, (req, res) => {
     }
 });
 
-app.post("/endgame", checkJwt, (req, res) => {
+app.post("/api/endgame", checkJwt, (req, res) => {
     console.log("endgame");
     const host = req.user.nickname;
     const game = games.get(host);
@@ -143,7 +143,7 @@ app.post("/endgame", checkJwt, (req, res) => {
 
 });
 
-app.post("/leavegame", checkJwt, (req, res) => {
+app.post("/api/leavegame", checkJwt, (req, res) => {
     console.log("leavegame");
     const name = req.user.nickname;
     const game = playerToGame.get(name);
