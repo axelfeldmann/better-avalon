@@ -21,6 +21,43 @@ function shuffle(array) {
     return array;
 }
 
+function getRoles(numPlayers){
+    switch(numPlayers){
+        case 1:
+            return ["MERLIN"];
+        case 2:
+            return getRoles(1).concat(["MORGANA"]);
+        case 3:
+            return getRoles(2).concat(["PERCIVAL"]);
+        case 4:
+            return getRoles(3).concat(["TOWNIE"]);
+        case 5:
+            return getRoles(4).concat(["MORDRED"]);
+        case 6:
+            return getRoles(5).concat(["TOWNIE"]);
+        case 7:
+            return ["MERLIN", "MORGANA", "PERCIVAL", "MORDRED", "GUINEVERE", "BAD LANCELOT", "GOOD LANCELOT"];
+        case 8:
+            return getRoles(7).concat(["TOWNIE"]);
+        case 9:
+            return getRoles(8).concat(["OBERON"]);
+        case 10:
+            return getRoles(9).concat(["TOWNIE"]);
+        case 11:
+            return getRoles(10).concat(["DEAN KAMEN"]);
+        case 12:
+            return getRoles(11).concat(["BROBERON"]);
+        case 13:
+            return getRoles(12).concat(["TOWNIE"]);
+        case 14:
+            return getRoles(13).concat(["BAD TOWNIE"]);
+        case 15:
+            return getRoles(14).concat(["TOWNIE"]);
+        default:
+            return undefined;
+    }
+}
+
 function mission(numPlayers, failsRequired) {
     return {
         type: "MISSION",
@@ -30,13 +67,72 @@ function mission(numPlayers, failsRequired) {
     };
 }
 
-function isBad(role) {
-    switch (role) {
-        case "OBERON":
-            return true;
+const oneFail = (numPlayers) => mission(numPlayers, 1);
+const twoFail = (numPlayers) => mission(numPlayers, 2);
+
+function generateEvents(numPlayers) {
+    switch(numPlayers){
+        case 1:
+            return [oneFail(1), oneFail(1), oneFail(1)];
+        case 2:
+            return [oneFail(1), oneFail(2), oneFail(2)];
+        case 3:
+            return [oneFail(1), oneFail(2), oneFail(2)];
+        case 4:
+            return [oneFail(1), oneFail(2), oneFail(2), oneFail(3), oneFail(3)];
+        case 5:
+            return [oneFail(1), oneFail(2), oneFail(2), twoFail(3), oneFail(3)];
+        case 6:
+            return [oneFail(2), oneFail(3), oneFail(3), twoFail(4), oneFail(4)];
+        case 7:
+            return [oneFail(2), oneFail(3), oneFail(3), twoFail(4), oneFail(4)];
+        case 8:
+            return [oneFail(3), oneFail(4), oneFail(4), twoFail(5), oneFail(5)];
+        case 9:
+            return [oneFail(3), oneFail(4), oneFail(4), twoFail(5), oneFail(5)];
+        case 10:
+            return [oneFail(3), oneFail(4), oneFail(4), twoFail(5), oneFail(5)];
+        case 11:
+            return [oneFail(4), oneFail(5), oneFail(5), twoFail(6), oneFail(6)];
+        case 12:
+            return [oneFail(4), oneFail(5), oneFail(5), twoFail(6), oneFail(6)];
+        case 13:
+            return [oneFail(4), oneFail(5), oneFail(5), twoFail(6), oneFail(6), twoFail(7), oneFail(7)];
+        case 14:
+            return [oneFail(4), oneFail(5), oneFail(5), twoFail(6), oneFail(6), twoFail(7), oneFail(7)];
+        case 15:
+            return [oneFail(4), oneFail(5), oneFail(5), twoFail(6), oneFail(6), twoFail(7), oneFail(7)];
         default:
-            return false;
+            return undefined;
     }
+}
+
+function roleSees(role){
+    switch(role){
+        case "MERLIN":
+            return ["MORGANA", "BAD LANCELOT", "OBERON", "BROBERON", "BAD TOWNIE", "DEAN KAMEN"];
+        case "MORGANA":
+            return ["BAD LANCELOT", "BAD TOWNIE", "MORDRED"];
+        case "MORDRED":
+            return ["MORGANA", "BAD LANCELOT", "BAD TOWNIE"];
+        case "BAD LANCELOT":
+            return ["MORDRED", "MORGANA", "BAD TOWNIE"];
+        case "BAD TOWNIE":
+            return ["MORDRED", "MORGANA", "BAD LANCELOT"];
+        case "OBERON":
+            return ["BROBERON"];
+        case "PERCIVAL":
+            return ["MERLIN", "MORGANA"];
+        case "GUINEVERE":
+            return ["GOOD LANCELOT", "BAD LANCELOT"];
+        default:
+            return [];
+    }
+}
+
+function isBad(role) {
+    const badPeople = ["MORGANA", "MORDRED", "BAD LANCELOT", "OBERON", "BROBERON", "BAD TOWNIE"];
+    return badPeople.includes(role);
 }
 
 module.exports = class Game {
@@ -93,19 +189,17 @@ module.exports = class Game {
     }
 
     generateEvents() {
-        return [
-            mission(2, 1),
-            { type: "LADY" },
-            mission(2, 2),
-            { type: "LADY" },
-            mission(2, 1)
-        ];
+        const numPlayers = this.players.size;
+        return generateEvents(numPlayers);
     }
 
     assignRoles() {
+        let roles = getRoles(this.players.size);
+        shuffle(roles);
         let roleMap = new Map();
+        let i = 0;
         this.players.forEach((playerObj, name) => {
-            roleMap.set(name, "OBERON");
+            roleMap.set(name, roles[i++]);
         });
         return roleMap;
     }
@@ -119,22 +213,36 @@ module.exports = class Game {
     start(name) {
         if (name !== this.host) return false;
         const order = this.assignOrder();
+        const roles = this.assignRoles();
+        const events = this.generateEvents();
+        if (!roles) return false;
+        if (!events) return false;
         this.state = {
-            events: this.generateEvents(),
-            playerRoles: this.assignRoles(),
-            order: this.assignOrder(),
+            events: events,
+            playerRoles: roles,
+            order: order,
             turnIdx: 1,
             lady: order[0],
             eventIdx: 0,
             messages: new Map(),
             gameState: "PROPOSING",
             proposalNum: 1,
-            maxProposals: 2
+            maxProposals: 2,
+            votersFor: [],
+            votersAgainst: []
         };
         this.state.waiting = [ this.state.order[this.state.turnIdx] ];
         this.players.forEach((playerObj, name) => {
             const role = this.state.playerRoles.get(name);
-            this.state.messages.set(name, "your role is " + role);
+            
+            let seenRoles = roleSees(role);
+            let seenPlayers = this.state.order.filter((otherPlayer) => {
+                const otherPlayerRole = this.state.playerRoles.get(otherPlayer);
+                return seenRoles.includes(otherPlayerRole);
+            });
+            let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.toString() : "no one";
+            let msg = "your role is " + role + "\nyou see: " + seenPlayersStr;
+            this.state.messages.set(name, msg);
         });
         return true;
     }
@@ -152,6 +260,8 @@ module.exports = class Game {
         mission.proposal = proposal;
         this.state.gameState = "VOTING";
         this.state.waiting = [...this.state.order];
+        this.state.votersFor = [];
+        this.state.votersAgainst = [];
 
         this.state.order.forEach((player) => {
             const proposalStr = "mission proposal: " + proposal.toString();
@@ -200,12 +310,22 @@ module.exports = class Game {
         if (mission.type !== "MISSION" || mission.status != "VOTING") return false;
         if (!this.state.waiting.includes(voter)) return false;
         mission.votesReceived += 1;
-        if (vote === "YES") mission.votesFor += 1;
+        if (vote === "YES") {
+            mission.votesFor += 1;
+            this.state.votersFor.push(voter);
+        } else {
+            this.state.votersAgainst.push(voter);
+        }
         this.state.waiting = this.state.waiting.filter(player => player !== voter);
 
         if(this.state.waiting.length !== 0) { // need more votes
             return true;
         }
+
+        const forStr = this.state.votersFor.toString() + ` ${this.state.votersFor.length}`;
+        const againstStr = this.state.votersAgainst.toString() + ` ${this.state.votersAgainst.length}`;
+        const messageStr = `votes for: ${forStr}\nvotes against: ${againstStr}\n`
+
         const happening = mission.votesFor > (mission.votesReceived / 2);
         const autoFail = this.state.proposalNum === this.state.maxProposals;
         if (!happening && autoFail) {
@@ -213,7 +333,7 @@ module.exports = class Game {
             mission.fails = this.state.order.length;
             this.state.order.forEach((player) => {
                 this.state.messages.set(player,
-                    `the proposal only got ${mission.votesFor}/${mission.votesReceived} votes... mission fail!`
+                    messageStr + "this was the last proposal. mission fail!"
                 );
             });
             delete mission.proposal;
@@ -225,8 +345,7 @@ module.exports = class Game {
             this.state.turnIdx = (this.state.turnIdx + 1) % this.state.order.length;
             this.state.gameState = "PROPOSING";
             this.state.order.forEach((player) => {
-                this.state.messages.set(player, 
-                    `the proposal only got ${mission.votesFor}/${mission.votesReceived} votes`);
+                this.state.messages.set(player, messageStr + "mission is voted down!");
             });
             mission.status = "NONE";
             delete mission.proposal;
@@ -237,8 +356,7 @@ module.exports = class Game {
             this.state.gameState = "MISSION";
             mission.status = "HAPPENING";
             this.state.order.forEach((player) => {
-                this.state.messages.set(player, 
-                    `the proposal is happening with ${mission.votesFor}/${mission.votesReceived} votes`);
+                this.state.messages.set(player, messageStr + "mission is happening!");
             });
             this.state.waiting = [...mission.proposal];
             mission.missionResponses = 0;
