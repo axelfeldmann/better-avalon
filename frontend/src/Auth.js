@@ -4,10 +4,10 @@ class Auth {
   constructor() {
     this.auth0 = new auth0.WebAuth({
       // the following three lines MUST be updated
-      domain: 'bk-tmp.auth0.com',
-      audience: 'https://bk-tmp.auth0.com/userinfo',
-      clientID: 'PVafIu9Q5QN65DiPByAFvCCJryY7n432',
-      redirectUri: 'http://localhost:3000/callback',
+      domain: 'axelfeldmann.auth0.com',
+      audience: 'https://axelfeldmann.auth0.com/userinfo',
+      clientID: 'fxwSJvednKT8LMzYjMXnKrdAhiaVH3o4',
+      redirectUri: `http://${window.location.host}/callback`,
       responseType: 'id_token',
       scope: 'openid profile'
     });
@@ -57,8 +57,8 @@ class Auth {
 
   signOut() {
     this.auth0.logout({
-      returnTo: 'http://localhost:3000',
-      clientID: 'PVafIu9Q5QN65DiPByAFvCCJryY7n432',
+        returnTo: `http://${window.location.host}`,
+      clientID: 'fxwSJvednKT8LMzYjMXnKrdAhiaVH3o4',
     });
   }
 
