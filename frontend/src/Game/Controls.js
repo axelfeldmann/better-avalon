@@ -25,7 +25,7 @@ const Mission = ({gameState, action, disabled}) => {
 
 const Lady = ({gameState, action, disabled}) => {
 	const me = auth0Client.getProfile().nickname;
-	const validPlayers = gameState.players.filter((player) => player != me);
+	const validPlayers = gameState.players.filter((player) => player !== me);
 	return (
 		<div>
 			{ validPlayers.map((player) => (

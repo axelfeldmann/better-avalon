@@ -15,7 +15,12 @@ class Game extends Component {
             "Authorization": `Bearer ${auth0Client.getIdToken()}`
         };
 
-        this.eventSource = new EventSourcePolyfill("/mygame", { headers });
+        // this is terrible but necessary for decent development
+        if (window.host === "localhost:3000") {
+            this.eventSource = new EventSourcePolyfill("http://localhost:8081/mygame", { headers });
+        } else {
+            this.eventSource = new EventSourcePolyfill("/mygame", { headers });
+        }
 
         this.state = {
             gameState: null

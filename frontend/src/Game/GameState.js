@@ -1,5 +1,4 @@
 import React from "react";
-import auth0Client from "../Auth";
 
 const Players = ({ players, turn, lady }) => {
 	return (
@@ -22,7 +21,7 @@ const Players = ({ players, turn, lady }) => {
 
 const Mission = ({ event, active, totalPlayers }) => {
 	const activeStr = active ? " <- " : "";
-	const { votesFor, votesReceived, fails, missionResponses, numPlayers, status, failsRequired } = event;
+	const { votesReceived, fails, missionResponses, numPlayers, status, failsRequired } = event;
 	const missionDesc = `${numPlayers}-player ${failsRequired}-fail mission: `
 	switch (status) {
 		case "NONE":

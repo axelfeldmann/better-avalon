@@ -1,12 +1,14 @@
 import React from "react";
-import auth0Client from "../Auth";
 
 const Message = ({ gameState }) => {
+
 	if (gameState.message) {
+		const msgStr = gameState.message;
+		const formatted = msgStr.split("\n").map((t, i) => (<p key={i}> {t} </p>));
 	    return (
 	        <div className = "message">
 	        	<h4> message </h4>
-	            <p> { gameState.message } </p>
+	            { formatted }
 	        </div>
 	    );
 	} else {
