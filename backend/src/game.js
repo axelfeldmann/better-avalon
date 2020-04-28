@@ -386,7 +386,7 @@ module.exports = class Game {
             mission.fails = this.state.order.length;
             this.state.order.forEach((player) => {
                 this.state.messages.set(player,
-                    messageStr + "This was the last proposal. Ths mission fails!"
+                    messageStr + "This was the last proposal. The mission fails!"
                 );
             });
             delete mission.proposal;
@@ -412,6 +412,7 @@ module.exports = class Game {
                 this.state.messages.set(player, messageStr + "The mission is happening!");
             });
             this.state.waiting = [...mission.proposal];
+            mission.proposal = mission.proposal.map(p => this.nicknames.getNickname(p));
             mission.missionResponses = 0;
             mission.fails = 0;
             delete mission.votesReceived;
@@ -437,10 +438,10 @@ module.exports = class Game {
         let message = "";
         if (failed) {
             mission.status = "FAILED";
-            message = `The mission failed with ${mission.fails} fails`;
+            message = `The mission failed with ${mission.fails} fails.`;
         } else {
             mission.status = "PASSED";
-            message = `The mission passed with ${mission.fails} fails!`;
+            message = `The mission passed with ${mission.fails} fails.`;
         }
 
         console.log(mission.status);

@@ -6,6 +6,7 @@ import GameState from "./GameState";
 import Controls from "./Controls";
 import Message from "./Message";
 import Banner from "./Banner";
+import axios from "axios";
 
 class Game extends Component {
 
@@ -42,15 +43,31 @@ class Game extends Component {
         this.eventSource.close();
     }
 
+    end() {
+        var headers = {
+            "Authorization": `Bearer ${auth0Client.getIdToken()}`
+        };
+        this.setState({ buttonsDisabled : true });
+        axios.post("/api/endgame", {}, { headers }).then(() => {
+            this.props.history.push("/");
+        });
+    }
+
     renderGame() {
         const gameState = this.state.gameState;
-        console.log(gameState);
+        const isHost = gameState.host === auth0Client.getProfile().nickname;
         return (
-            <div className = "game">
+            <div className = "container-fluid">
                 <Message gameState = { gameState }/>
                 <Banner gameState = {gameState}/>
                 <Controls gameState = { gameState }/>
                 <GameState gameState = { gameState }/>
+                { isHost ? 
+                    <button key = "leave" disabled={ this.state.buttonsDisabled }
+                        className = "btn btn-danger btn-info mt-3 float-right" 
+                        onClick = {() => {this.end()}}> 
+                        End Game 
+                    </button> : <div></div> }
             </div>
         );
     }

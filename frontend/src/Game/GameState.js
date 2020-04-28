@@ -27,10 +27,11 @@ const Players = ({ state, players, turnIdx }) => {
 };
 
 const Mission = ({ event, active, totalPlayers, idx }) => {
-	const { votesReceived, fails, missionResponses, numPlayers, status, failsRequired } = event;
+	const { votesReceived, fails, missionResponses, numPlayers, status, failsRequired, proposal } = event;
 	let missionDesc = `${numPlayers} player, ${failsRequired} fail required`;
 
 	let statusStr = "";
+	let missionGoers = "";
 	switch (status) {
 		case "NONE":
 			if (active) {
@@ -42,12 +43,15 @@ const Mission = ({ event, active, totalPlayers, idx }) => {
 			break;
 		case "HAPPENING":
 			statusStr = `Received ${missionResponses}/${numPlayers} responses`;
+			missionGoers = `${proposal.join(", ")}`;
 			break;
 		case "FAILED":
 			statusStr = `Failed with ${fails} fails`;
+			missionGoers = `${proposal.join(", ")}`;
 			break;
 		case "PASSED":
 			statusStr = `Passed with ${fails} fails`;
+			missionGoers = `${proposal.join(", ")}`;
 			break;
 		default:
 			break;
@@ -57,6 +61,7 @@ const Mission = ({ event, active, totalPlayers, idx }) => {
 				<td>{idx + 1}</td>
 				<td>{missionDesc}</td>
 				<td>{statusStr}</td>
+				<td>{missionGoers}</td>
 			</tr>);
 };
 
@@ -88,6 +93,7 @@ const Events = ({ events, eventIdx, totalPlayers }) => {
 							<th scope="col"> Mission </th>
 							<th scope="col"> Description </th>
 							<th scope="col"> Status </th>
+							<th scope="col"> Participants </th>
 						</tr>
 					</thead>
 					<tbody>

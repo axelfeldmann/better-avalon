@@ -119,16 +119,6 @@ class Controls extends Component {
 		});
 	}
 
-	end() {
-	    var headers = {
-	        "Authorization": `Bearer ${auth0Client.getIdToken()}`
-	    };
-		this.setState({ buttonsDisabled : true });
-		axios.post("/api/endgame", {}, { headers }).then(() => {
-			this.props.history.push("/");
-		});
-	}
-
 	getMainControl(me, gameState){
 		const active = gameState.waiting.includes(me);
 		if (!active) return undefined;
@@ -182,12 +172,6 @@ class Controls extends Component {
 	        			className = "btn btn-info btn-block"
 						onClick = {() => {this.leave()}}> 
 						Leave Game 
-					</button> : <div></div> }
-	        	{ endButton ? 
-	        		<button key = "leave" disabled={ this.state.buttonsDisabled }
-	        			className = "btn btn-info btn-block mt-3" 
-						onClick = {() => {this.end()}}> 
-						End Game 
 					</button> : <div></div> }
 			</div>
 	        </div>
