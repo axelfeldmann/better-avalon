@@ -4,15 +4,19 @@ const Message = ({ gameState }) => {
 
 	if (gameState.message) {
 		const msgStr = gameState.message;
-		const formatted = msgStr.split("\n").map((t, i) => (<p key={i}> {t} </p>));
+		const formatted = msgStr.split("\n").map((t, i) => (
+			<div key={i}> {t} </div>
+		));
 	    return (
-	        <div className = "message">
-	        	<h4> message </h4>
-	            { formatted }
+	        <div className = "card text-white bg-info mb-1">
+	            <div className="card-body">
+	            	<h5 className="card-title"> Last Update </h5>
+	            	{ formatted }
+	            </div>
 	        </div>
 	    );
 	} else {
-		return (<div> no message </div>)
+		return (<div></div>)
 	}
 };
 

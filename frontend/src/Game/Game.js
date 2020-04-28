@@ -46,17 +46,16 @@ class Game extends Component {
         console.log(gameState);
         return (
             <div className = "game">
-                <h2 className = "title"> { gameState.host }'s game </h2>
                 <Message gameState = { gameState }/>
-                <Controls gameState = { gameState }/>
                 <GameState gameState = { gameState }/>
+                <Controls gameState = { gameState }/>
             </div>
         );
     }
 
     render() {
         return (
-            <div className="container">
+            <div className="container-fluid">
                 { this.state.gameState === null
                     ? <p> loading game state... </p>
                     : this.renderGame() }

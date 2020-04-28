@@ -46,7 +46,7 @@ class Lobby extends Component {
 
     async newgame() {
         if (!this.goodNickname()) {
-            this.setState({ banner : "invalid nickname"});
+            this.setState({ banner : "Nickname must be 5-14 characters!"});
             return;
         }
         this.setState({
@@ -70,7 +70,7 @@ class Lobby extends Component {
 
     async joingame(host) {
         if (!this.goodNickname()) {
-            this.setState({ banner : "invalid nickname"});
+            this.setState({ banner : "Nickname must be 5-14 characters!"});
             return;
         }
         this.setState({
@@ -86,7 +86,7 @@ class Lobby extends Component {
         ).catch(error => {
             console.log(error);
             this.setState({
-                banner: "try another nickname - someone in game already has that one",
+                banner: "Please try another nickname, someone is already using that one.",
                 nickname: "",
                 buttonsDisabled: false
             });
@@ -98,16 +98,37 @@ class Lobby extends Component {
     }
 
     render() {
+        if (!this.state.games) {
+            return (
+                <div className = "container"> 
+                    loading... 
+                </div>
+            );
+        } 
+
         return (
-            <div className="container">
-                <div className="header"> current games: </div>
-                <label> { this.state.banner } </label>
-                { this.state.games === null 
-                    ? <p> loading games... </p>
-                    : this.state.games.map((game, idx) => 
+            <div className="container-fluid">
+                <div className="page-header"> 
+                    <h4> Welcome to Avalon! </h4>
+                    <p className = "description"> 
+                        Please enter a nickname, then either join a game or create your own. 
+                    </p>
+                    { this.state.banner ? <div className = "alert alert-primary"> { this.state.banner } </div> : <div></div>}
+                </div>
+                <div className = "input-group mb-3">
+                    <div className="input-group-prepend">
+                        <span className="input-group-text">Nickname</span>
+                    </div>
+                    <input onChange={(event) => this.update(event.target.value)}
+                            className="form-control"
+                    />
+                </div>
+                <div>
+                    { this.state.games.map((game, idx) => 
                         (
                             <div key={idx}> 
                                 <button
+                                    className="btn btn-info btn-lg btn-block mt-1"
                                     key={game.host}
                                     onClick={() => this.joingame(game.host)}
                                     disabled={this.state.buttonsDisabled}
@@ -115,15 +136,17 @@ class Lobby extends Component {
                                     join {game.host}'s game
                                 </button>
                             </div>
-                        ))
-                }
-                <input onChange={(event) => this.update(event.target.value)}/>
-                <button
-                    onClick={() => {this.newgame()}}
-                    disabled={this.state.buttonsDisabled}
-                > 
-                    new game 
-                </button>
+                        ))}
+                    <div>
+                        <button
+                                className="btn btn-info btn-lg btn-block mt-1"
+                                onClick={() => {this.newgame()}}
+                                disabled={this.state.buttonsDisabled}> 
+                            create my own game 
+                        </button>
+                    </div>
+                </div>
+
             </div>
         );
     }

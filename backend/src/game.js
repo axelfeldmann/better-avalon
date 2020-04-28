@@ -152,7 +152,7 @@ class Nicknames {
     }
 
     deleteNickname(username){
-        const nickname = this.toNickname(username);
+        const nickname = this.toNickname.get(username);
         this.toNickname.delete(username);
         this.toUsername.delete(nickname);
     }
@@ -172,6 +172,7 @@ module.exports = class Game {
         this.players = new Map();
         this.state = { gameState : "WAITING" };
         this.nicknames = new Nicknames();
+        this.state.waiting = [ host ];
     }
 
     validNickname(nickname){
@@ -269,7 +270,7 @@ module.exports = class Game {
             events: events,
             playerRoles: roles,
             order: order,
-            turnIdx: 1,
+            turnIdx: 1 % order.length,
             lady: order[0],
             eventIdx: 0,
             messages: new Map(),
@@ -504,7 +505,8 @@ module.exports = class Game {
             return { 
                 host: this.host, 
                 players: [ ...this.players.keys() ].map(player => this.nicknames.getNickname(player)), 
-                state: this.state.gameState
+                state: this.state.gameState,
+                waiting: this.state.waiting
             };
         } else {
             return {
