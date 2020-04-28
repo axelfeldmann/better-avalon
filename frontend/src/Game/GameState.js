@@ -87,7 +87,8 @@ const Events = ({ events, eventIdx, totalPlayers }) => {
 			<div className="card mb-1">
 				<div className="card-header bg-secondary"> Missions </div>
 				<div className="card-body">
-				<table className="table table-condensed mb-0">
+				<div className="table-responsive">
+				<table className="table mb-0">
 					<thead>
 						<tr>
 							<th scope="col"> Mission </th>
@@ -105,6 +106,7 @@ const Events = ({ events, eventIdx, totalPlayers }) => {
  								/>)}
 					</tbody>
 				</table>
+				</div>
 				</div>
 			</div>
 		);
