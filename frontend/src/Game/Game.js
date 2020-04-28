@@ -5,6 +5,7 @@ import { EventSourcePolyfill } from 'event-source-polyfill';
 import GameState from "./GameState";
 import Controls from "./Controls";
 import Message from "./Message";
+import Banner from "./Banner";
 
 class Game extends Component {
 
@@ -47,8 +48,9 @@ class Game extends Component {
         return (
             <div className = "game">
                 <Message gameState = { gameState }/>
-                <GameState gameState = { gameState }/>
+                <Banner gameState = {gameState}/>
                 <Controls gameState = { gameState }/>
+                <GameState gameState = { gameState }/>
             </div>
         );
     }

@@ -24,35 +24,35 @@ function shuffle(array) {
 function getRoles(numPlayers){
     switch(numPlayers){
         case 1:
-            return ["MERLIN"];
+            return ["Merlin"];
         case 2:
-            return getRoles(1).concat(["MORGANA"]);
+            return getRoles(1).concat(["Morgana"]);
         case 3:
-            return getRoles(2).concat(["PERCIVAL"]);
+            return getRoles(2).concat(["Percival"]);
         case 4:
-            return getRoles(3).concat(["TOWNIE"]);
+            return getRoles(3).concat(["Townie"]);
         case 5:
-            return getRoles(4).concat(["MORDRED"]);
+            return getRoles(4).concat(["Mordred"]);
         case 6:
-            return getRoles(5).concat(["TOWNIE"]);
+            return getRoles(5).concat(["Townie"]);
         case 7:
-            return ["MERLIN", "MORGANA", "PERCIVAL", "MORDRED", "GUINEVERE", "BAD LANCELOT", "GOOD LANCELOT"];
+            return ["Merlin", "Morgana", "Percival", "Mordred", "Guinevere", "Bad Lancelot", "Good Lancelot"];
         case 8:
-            return getRoles(7).concat(["TOWNIE"]);
+            return getRoles(7).concat(["Townie"]);
         case 9:
-            return getRoles(8).concat(["OBERON"]);
+            return getRoles(8).concat(["Oberon"]);
         case 10:
-            return getRoles(9).concat(["TOWNIE"]);
+            return getRoles(9).concat(["Townie"]);
         case 11:
-            return getRoles(10).concat(["DEAN KAMEN"]);
+            return getRoles(10).concat(["Dean Kamen"]);
         case 12:
-            return getRoles(11).concat(["BROBERON"]);
+            return getRoles(11).concat(["Broberon"]);
         case 13:
-            return getRoles(12).concat(["TOWNIE"]);
+            return getRoles(12).concat(["Townie"]);
         case 14:
-            return getRoles(13).concat(["BAD TOWNIE"]);
+            return getRoles(13).concat(["Bad Townie"]);
         case 15:
-            return getRoles(14).concat(["TOWNIE"]);
+            return getRoles(14).concat(["Townie"]);
         default:
             return undefined;
     }
@@ -109,22 +109,22 @@ function generateEvents(numPlayers) {
 
 function roleSees(role){
     switch(role){
-        case "MERLIN":
-            return ["MORGANA", "BAD LANCELOT", "OBERON", "BROBERON", "BAD TOWNIE", "DEAN KAMEN"];
-        case "MORGANA":
-            return ["BAD LANCELOT", "BAD TOWNIE", "MORDRED"];
-        case "MORDRED":
-            return ["MORGANA", "BAD LANCELOT", "BAD TOWNIE"];
-        case "BAD LANCELOT":
-            return ["MORDRED", "MORGANA", "BAD TOWNIE"];
-        case "BAD TOWNIE":
-            return ["MORDRED", "MORGANA", "BAD LANCELOT"];
-        case "OBERON":
-            return ["BROBERON"];
-        case "PERCIVAL":
-            return ["MERLIN", "MORGANA"];
-        case "GUINEVERE":
-            return ["GOOD LANCELOT", "BAD LANCELOT"];
+        case "Merlin":
+            return ["Morgana", "Bad Lancelot", "Oberon", "Broberon", "Bad Townie", "Dean Kamen"];
+        case "Morgana":
+            return ["Bad Lancelot", "Bad Townie", "Mordred"];
+        case "Mordred":
+            return ["Morgana", "Bad Lancelot", "Bad Townie"];
+        case "Bad Lancelot":
+            return ["Mordred", "Morgana", "Bad Townie"];
+        case "Bad Townie":
+            return ["Mordred", "Morgana", "Bad Lancelot"];
+        case "Oberon":
+            return ["Broberon"];
+        case "Percival":
+            return ["Merlin", "Morgana"];
+        case "Guinevere":
+            return ["Good Lancelot", "Bad Lancelot"];
         default:
             return [];
     }
@@ -160,7 +160,7 @@ class Nicknames {
 }
 
 function isBad(role) {
-    const badPeople = ["MORGANA", "MORDRED", "BAD LANCELOT", "OBERON", "BROBERON", "BAD TOWNIE"];
+    const badPeople = ["Morgana", "Mordred", "Bad Lancelot", "Oberon", "Broberon", "Bad Townie"];
     return badPeople.includes(role);
 }
 
@@ -290,8 +290,8 @@ module.exports = class Game {
                 return seenRoles.includes(otherPlayerRole);
             });
             seenPlayers = seenPlayers.map(username => this.nicknames.getNickname(username));
-            let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.toString() : "no one";
-            let msg = "your role is " + role + "\nyou see: " + seenPlayersStr;
+            let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.join(", ") : "no one";
+            let msg = "Your role is " + role + "\nYou see: " + seenPlayersStr;
             this.state.messages.set(name, msg);
         });
         return true;
@@ -316,8 +316,8 @@ module.exports = class Game {
         this.state.votersFor = [];
         this.state.votersAgainst = [];
 
+        const proposalStr = "Mission proposal: " + proposal.map((p) => this.nicknames.getNickname(p)).join(", ");
         this.state.order.forEach((player) => {
-            const proposalStr = "mission proposal: " + proposal.toString();
             this.state.messages.set(player, proposalStr);
         })
 
@@ -375,9 +375,9 @@ module.exports = class Game {
             return true;
         }
 
-        const forStr = this.state.votersFor.toString() + ` ${this.state.votersFor.length}`;
-        const againstStr = this.state.votersAgainst.toString() + ` ${this.state.votersAgainst.length}`;
-        const messageStr = `votes for: ${forStr}\nvotes against: ${againstStr}\n`
+        const forStr = this.state.votersFor.join(", ") + ` (${this.state.votersFor.length})`;
+        const againstStr = this.state.votersAgainst.join(", ") + ` (${this.state.votersAgainst.length})`;
+        const messageStr = `Votes for: ${forStr}\nVotes against: ${againstStr}\n`
 
         const happening = mission.votesFor > (mission.votesReceived / 2);
         const autoFail = this.state.proposalNum === this.state.maxProposals;
@@ -386,7 +386,7 @@ module.exports = class Game {
             mission.fails = this.state.order.length;
             this.state.order.forEach((player) => {
                 this.state.messages.set(player,
-                    messageStr + "this was the last proposal. mission fail!"
+                    messageStr + "This was the last proposal. Ths mission fails!"
                 );
             });
             delete mission.proposal;
@@ -398,7 +398,7 @@ module.exports = class Game {
             this.state.turnIdx = (this.state.turnIdx + 1) % this.state.order.length;
             this.state.gameState = "PROPOSING";
             this.state.order.forEach((player) => {
-                this.state.messages.set(player, messageStr + "mission is voted down!");
+                this.state.messages.set(player, messageStr + "The mission is voted down!");
             });
             mission.status = "NONE";
             delete mission.proposal;
@@ -409,7 +409,7 @@ module.exports = class Game {
             this.state.gameState = "MISSION";
             mission.status = "HAPPENING";
             this.state.order.forEach((player) => {
-                this.state.messages.set(player, messageStr + "mission is happening!");
+                this.state.messages.set(player, messageStr + "The mission is happening!");
             });
             this.state.waiting = [...mission.proposal];
             mission.missionResponses = 0;
@@ -437,10 +437,10 @@ module.exports = class Game {
         let message = "";
         if (failed) {
             mission.status = "FAILED";
-            message = `the mission failed with ${mission.fails} fails`;
+            message = `The mission failed with ${mission.fails} fails`;
         } else {
             mission.status = "PASSED";
-            message = `the mission passed with ${mission.fails} fails!`;
+            message = `The mission passed with ${mission.fails} fails!`;
         }
 
         console.log(mission.status);

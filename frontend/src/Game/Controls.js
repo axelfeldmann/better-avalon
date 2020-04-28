@@ -174,7 +174,7 @@ class Controls extends Component {
 			return <div> </div>;
 		}
 	    return (
-	        <div className = "card">
+	        <div className = "card mb-1">
 	        <div className = "card-body">
 	        	{ mainControl }
 	        	{ leaveButton ? 
