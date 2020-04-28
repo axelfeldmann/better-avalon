@@ -164,6 +164,12 @@ function isBad(role) {
     return badPeople.includes(role);
 }
 
+function keepalive(player) {
+    if (player.con) {
+        send(player.con, { type : "keepalive"});
+        setTimeout(() => keepalive(player), 40000);
+    }
+}
 
 
 module.exports = class Game {
@@ -222,6 +228,7 @@ module.exports = class Game {
         let player = this.players.get(name);
         assert(player);
         player.con = res;
+        setTimeout(() => keepalive(player), 40000);
         send(res, this.stateForPlayer(name));
     }
 

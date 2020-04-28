@@ -31,11 +31,15 @@ class Game extends Component {
 
     componentDidMount() {
         this.eventSource.onerror = (error) => {
-            this.props.history.push("/");
+            if (error.status) {
+                this.props.history.push("/");
+            }
         }
         this.eventSource.onmessage = (event) => {
             const json = JSON.parse(event.data);
-            this.updateGameState(json);
+            if (json.type !== "keepalive") {
+                this.updateGameState(json);
+            }
         }
     }
 

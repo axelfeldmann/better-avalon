@@ -138,6 +138,7 @@ app.post("/api/endgame", checkJwt, (req, res) => {
         playerToGame.delete(name);
         if (playerObj.con) {
             playerObj.con.end();
+            playerObj.con = undefined;
         }
     });
     games.delete(host);
