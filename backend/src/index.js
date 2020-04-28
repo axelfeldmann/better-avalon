@@ -40,9 +40,8 @@ const checkJwt = jwt({
 
 // retrieve all questions
 app.get("/api/games", checkJwt, (req, res) => {
-
-    console.log("games");
     const name = req.user.nickname;
+    console.log("games", name);
     const game = playerToGame.get(name);
     if (game) {
         res.send(400);
@@ -65,8 +64,8 @@ app.get("/api/games", checkJwt, (req, res) => {
 
 // should establish a streaming connection with the server
 app.get("/api/mygame", checkJwt, (req, res) => {
-    console.log("mygame");
     const name = req.user.nickname;
+    console.log("mygame", name);
     const game = playerToGame.get(name);
     if (!game) {
         res.send(400);
@@ -88,14 +87,15 @@ app.get("/api/mygame", checkJwt, (req, res) => {
 
 app.post("/api/action", checkJwt, (req, res) => {
     const name = req.user.nickname;
+    console.log("action", name);
     let game = playerToGame.get(name);
     game.handleAction(name, req.body, res);
     res.send();
 });
 
 app.post("/api/newgame", checkJwt, (req, res) => {
-    
     const name = req.user.nickname;
+    console.log("newgame", name);
     const nickname = req.body.nickname;
     assert(!playerToGame.has(name));
     assert(!games.has(name));
@@ -114,7 +114,7 @@ app.post("/api/joingame", checkJwt, (req, res) => {
     const name = req.user.nickname;
     const nickname = req.body.nickname;
     const game = games.get(host);
-    console.log(host);
+    console.log("joingame", name);
     assert(game);
     assert(!playerToGame.has(name));
     if (game.addPlayer(name, nickname)) {
@@ -126,8 +126,8 @@ app.post("/api/joingame", checkJwt, (req, res) => {
 });
 
 app.post("/api/endgame", checkJwt, (req, res) => {
-    console.log("endgame");
     const host = req.user.nickname;
+    console.log("endgame", host);
     const game = games.get(host);
     if (!game) {
         res.send(400);
@@ -136,7 +136,9 @@ app.post("/api/endgame", checkJwt, (req, res) => {
     game.players.forEach((playerObj, name) => {
         assert(playerToGame.has(name));
         playerToGame.delete(name);
-        playerObj.con.end();
+        if (playerObj.con) {
+            playerObj.con.end();
+        }
     });
     games.delete(host);
     res.send();
@@ -144,9 +146,9 @@ app.post("/api/endgame", checkJwt, (req, res) => {
 });
 
 app.post("/api/leavegame", checkJwt, (req, res) => {
-    console.log("leavegame");
     const name = req.user.nickname;
     const game = playerToGame.get(name);
+    console.log("leavegame", name);
     if (!game || !game.removePlayer(name)) {
         res.send(400);
         return;
@@ -163,6 +165,6 @@ app.use((req, res) => {
 });
 
 // start the server
-app.listen(8081, () => {
-  console.log('listening on port 8081');
+app.listen(80, () => {
+  console.log('listening on port 80');
 });

@@ -219,7 +219,6 @@ module.exports = class Game {
     }
 
     newCon(name, res) {
-        console.log(name);
         let player = this.players.get(name);
         assert(player);
         player.con = res;
@@ -298,13 +297,10 @@ module.exports = class Game {
     }
 
     handleProposal(proposer, proposal) {
-        console.log("before", proposal);
         proposal = proposal.map(nickname => this.nicknames.getUsername(nickname));
-        console.log("after", proposal);
         const turn = this.state.order[this.state.turnIdx];
         if (turn !== proposer || this.state.gameState !== "PROPOSING") return false;
         const mission = this.state.events[this.state.eventIdx];
-        console.log(mission);
         if (mission.type !== "MISSION" || mission.status !== "NONE") return false;
 
         mission.status = "VOTING";
@@ -430,8 +426,6 @@ module.exports = class Game {
 
         this.state.waiting = this.state.waiting.filter(player => player !== missionGoer);
 
-        console.log(this.state.waiting);
-
         if(this.state.waiting.length !== 0) return true;
 
         const failed = mission.fails >= mission.failsRequired;
@@ -443,8 +437,6 @@ module.exports = class Game {
             mission.status = "PASSED";
             message = `The mission passed with ${mission.fails} fails.`;
         }
-
-        console.log(mission.status);
 
         this.state.order.forEach((player) => {
             this.state.messages.set(player, message);
@@ -471,8 +463,6 @@ module.exports = class Game {
     }
 
     handleAction(name, body, res) {
-        console.log(name);
-        console.log(body);
         let success = true;
         switch (body.type) {
             case "START":
@@ -491,7 +481,6 @@ module.exports = class Game {
                 success = this.handleLady(name, body.arg);
                 break;
         }
-        console.log("next state " + this.state.gameState);
         if (success){
             this.broadcast()
             res.sendStatus(200);            
