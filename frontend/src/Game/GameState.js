@@ -43,15 +43,15 @@ const Mission = ({ event, active, totalPlayers, idx }) => {
 			break;
 		case "HAPPENING":
 			statusStr = `Received ${missionResponses}/${numPlayers} responses`;
-			missionGoers = `${proposal.join(", ")}`;
+			missionGoers = `${proposal ? proposal.join(", ") : ""}`;
 			break;
 		case "FAILED":
 			statusStr = `Failed with ${fails} fails`;
-			missionGoers = `${proposal.join(", ")}`;
+			missionGoers = `${proposal ? proposal.join(", ") : ""}`;
 			break;
 		case "PASSED":
 			statusStr = `Passed with ${fails} fails`;
-			missionGoers = `${proposal.join(", ")}`;
+			missionGoers = `${proposal ? proposal.join(", ") : ""}`;
 			break;
 		default:
 			break;
