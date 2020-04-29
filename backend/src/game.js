@@ -282,7 +282,7 @@ module.exports = class Game {
             messages: new Map(),
             gameState: "PROPOSING",
             proposalNum: 1,
-            maxProposals: roles.map(r => isBad(r)).length,
+            maxProposals: [...roles.values()].map(r => isBad(r)).length + 1,
             votersFor: [],
             votersAgainst: []
         };
