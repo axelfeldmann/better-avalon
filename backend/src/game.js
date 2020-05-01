@@ -2,6 +2,9 @@ const assert = require("assert");
 const State = require("./state.js");
 
 function send(con, obj) {
+    if (con.finished) {
+        return;
+    }
     con.write(`data: ${JSON.stringify(obj)}`);
     con.write("\n\n");
 }
