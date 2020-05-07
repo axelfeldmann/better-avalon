@@ -4,10 +4,12 @@ import auth0Client from "../Auth";
 const Banner = ({ gameState }) => {
 	const me = auth0Client.getProfile().nickname;
 	let message = "";
+	let color = "";
 	switch (gameState.state) {
 		case "WAITING":
 			if (gameState.host === me) {
-				message = "Start the game when you're ready."
+				message = "Start the game when you're ready.";
+				color = "bg-warning";
 			} else {
 				message = "Waiting for the host to start the game.";
 			}
@@ -20,6 +22,7 @@ const Banner = ({ gameState }) => {
 			let commonDesc = `a ${numPlayers}-person ${failsRequired}-fail mission. Proposal ${proposalNum}/${maxProposals}.`;
 			if (gameState.waiting.includes(me)) {
 				message = "Your turn to propose " + commonDesc;
+				color = "bg-warning";
 			} else {
 				message = `${proposer}'s turn to propose ` + commonDesc;
 			}
@@ -31,6 +34,7 @@ const Banner = ({ gameState }) => {
 			const proposer = gameState.players[gameState.turnIdx];
 			if (gameState.waiting.includes(me)) {
 				message = `Please vote on ${proposer}'s proposal.`;
+				color = "bg-warning";
 			} else {
 				const totalVotes = gameState.players.length;
 				const missingVotes = totalVotes - votesReceived;
@@ -44,6 +48,7 @@ const Banner = ({ gameState }) => {
 			const missingResponses = numPlayers - missionResponses;
 			if (gameState.waiting.includes(me)) {
 				message = `Please pass or fail the mission.`;
+				color = "bg-warning";
 			} else {
 				message = `Waiting for ${missingResponses}/${numPlayers} mission responses.`;
 			}
@@ -60,7 +65,7 @@ const Banner = ({ gameState }) => {
 		default:
 	}
 	return (
-		<div className="card mb-1">
+		<div className={"card mb-1 " + color }>
 			<div className="card-body">
 				<h5 className="card-title"> Current game state </h5>
 				<p className="card-text">{message}</p>

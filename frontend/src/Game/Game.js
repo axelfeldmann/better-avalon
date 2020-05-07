@@ -7,6 +7,7 @@ import Controls from "./Controls";
 import Message from "./Message";
 import Banner from "./Banner";
 import axios from "axios";
+import Sound from "react-sound";
 
 class Game extends Component {
 
@@ -26,7 +27,8 @@ class Game extends Component {
     }
 
     updateGameState(gameState) {
-        this.setState(Object.assign({}, { gameState }));
+        let freshUpdate = (!!this.state.gameState);
+        this.setState(Object.assign({}, { gameState, freshUpdate }));
     }
 
     componentDidMount() {
@@ -58,11 +60,16 @@ class Game extends Component {
     }
 
     renderGame() {
+        const freshUpdate = this.state.freshUpdate;
         const gameState = this.state.gameState;
         const isHost = gameState.host === auth0Client.getProfile().nickname;
         return (
             <div className = "container-fluid">
-                <Message gameState = { gameState }/>
+                <Sound url="boop.mp3" 
+                       playStatus={freshUpdate ? Sound.status.PLAYING : Sound.status.STOPPED}
+                       onFinishedPlaying={() => this.setState({ freshUpdate: false })}
+                       />
+                <Message gameState = { gameState } freshUpdate = { freshUpdate }/>
                 <Banner gameState = {gameState}/>
                 <Controls gameState = { gameState }/>
                 <GameState gameState = { gameState }/>

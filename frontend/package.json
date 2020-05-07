@@ -10,7 +10,8 @@
     "react-dom": "^16.6.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.1"
+    "react-scripts": "2.1.1",
+    "react-sound": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -27,5 +28,5 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "proxy":"http://localhost:80"
+  "proxy": "http://localhost:80"
 }
