@@ -9,7 +9,7 @@ const Banner = ({ gameState }) => {
 		case "WAITING":
 			if (gameState.host === me) {
 				message = "Start the game when you're ready.";
-				color = "bg-warning";
+				color = "bg-warning text-white";
 			} else {
 				message = "Waiting for the host to start the game.";
 			}
@@ -22,7 +22,7 @@ const Banner = ({ gameState }) => {
 			let commonDesc = `a ${numPlayers}-person ${failsRequired}-fail mission. Proposal ${proposalNum}/${maxProposals}.`;
 			if (gameState.waiting.includes(me)) {
 				message = "Your turn to propose " + commonDesc;
-				color = "bg-warning";
+				color = "bg-warning text-white";
 			} else {
 				message = `${proposer}'s turn to propose ` + commonDesc;
 			}
@@ -34,7 +34,7 @@ const Banner = ({ gameState }) => {
 			const proposer = gameState.players[gameState.turnIdx];
 			if (gameState.waiting.includes(me)) {
 				message = `Please vote on ${proposer}'s proposal.`;
-				color = "bg-warning";
+				color = "bg-warning text-white";
 			} else {
 				const totalVotes = gameState.players.length;
 				const missingVotes = totalVotes - votesReceived;
@@ -48,7 +48,7 @@ const Banner = ({ gameState }) => {
 			const missingResponses = numPlayers - missionResponses;
 			if (gameState.waiting.includes(me)) {
 				message = `Please pass or fail the mission.`;
-				color = "bg-warning";
+				color = "bg-warning text-white";
 			} else {
 				message = `Waiting for ${missingResponses}/${numPlayers} mission responses.`;
 			}
