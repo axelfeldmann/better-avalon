@@ -285,7 +285,7 @@ module.exports = class Game {
             messages: new Map(),
             gameState: "PROPOSING",
             proposalNum: 1,
-            maxProposals: [...roles.values()].map(r => isBad(r)).length + 1,
+            maxProposals: [...roles.values()].filter(r => isBad(r)).length + 1,
             votersFor: [],
             votersAgainst: []
         };
@@ -300,7 +300,11 @@ module.exports = class Game {
             });
             seenPlayers = seenPlayers.map(username => this.nicknames.getNickname(username));
             let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.join(", ") : "no one";
-            let msg = "Your role is " + role + "\nYou see: " + seenPlayersStr;
+            let msg = "Your role is " + role + "\nYou see: " + seenPlayersStr + "\n";
+            msg += "All the roles are: ";
+            let allroles = [ ...this.state.playerRoles.values() ];
+            shuffle(allroles);
+            msg += allroles.join(", ");
             this.state.messages.set(name, msg);
         });
         return true;
@@ -383,7 +387,9 @@ module.exports = class Game {
 
         const forStr = this.state.votersFor.join(", ") + ` (${this.state.votersFor.length})`;
         const againstStr = this.state.votersAgainst.join(", ") + ` (${this.state.votersAgainst.length})`;
-        const messageStr = `Votes for: ${forStr}\nVotes against: ${againstStr}\n`
+        let nicknames = mission.proposal.map(p => this.nicknames.getNickname(p));
+        let messageStr = "The mission: " + nicknames.join(", ") + "\n";
+        messageStr += `Votes for: ${forStr}\nVotes against: ${againstStr}\n`
 
         const happening = mission.votesFor > (mission.votesReceived / 2);
         const autoFail = this.state.proposalNum === this.state.maxProposals;
