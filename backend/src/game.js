@@ -268,6 +268,10 @@ module.exports = class Game {
         return players;
     }
 
+    setMsg(name, msg, type) {
+        this.state.messages.set(name, { text: msg, type: type });
+    }
+
     start(name) {
         if (name !== this.host) return false;
         const order = this.assignOrder();
@@ -305,7 +309,7 @@ module.exports = class Game {
             let allroles = [ ...this.state.playerRoles.values() ];
             shuffle(allroles);
             msg += allroles.join(", ");
-            this.state.messages.set(name, msg);
+            this.setMsg(name, msg, "ROLES");
         });
         return true;
     }
@@ -328,7 +332,7 @@ module.exports = class Game {
 
         const proposalStr = "Mission proposal: " + proposal.map((p) => this.nicknames.getNickname(p)).join(", ");
         this.state.order.forEach((player) => {
-            this.state.messages.set(player, proposalStr);
+            this.setMsg(player, proposalStr, "PROPOSAL");
         })
 
         return true;
@@ -397,8 +401,8 @@ module.exports = class Game {
             mission.status = "FAILED";
             mission.fails = this.state.order.length;
             this.state.order.forEach((player) => {
-                this.state.messages.set(player,
-                    messageStr + "This was the last proposal. The mission fails!"
+                this.setMsg(player,
+                    messageStr + "This was the last proposal. The mission fails!", "FAILED"
                 );
             });
             delete mission.proposal;
@@ -410,7 +414,7 @@ module.exports = class Game {
             this.state.turnIdx = (this.state.turnIdx + 1) % this.state.order.length;
             this.state.gameState = "PROPOSING";
             this.state.order.forEach((player) => {
-                this.state.messages.set(player, messageStr + "The mission is voted down!");
+                this.setMsg(player, messageStr + "The mission is voted down!", "VOTED DOWN");
             });
             mission.status = "NONE";
             delete mission.proposal;
@@ -421,7 +425,7 @@ module.exports = class Game {
             this.state.gameState = "MISSION";
             mission.status = "HAPPENING";
             this.state.order.forEach((player) => {
-                this.state.messages.set(player, messageStr + "The mission is happening!");
+                this.setMsg(player, messageStr + "The mission is happening!", "MISSION HAPPENING");
             });
             this.state.waiting = [...mission.proposal];
             mission.proposal = mission.proposal.map(p => this.nicknames.getNickname(p));
@@ -455,7 +459,7 @@ module.exports = class Game {
         }
 
         this.state.order.forEach((player) => {
-            this.state.messages.set(player, message);
+            this.setMsg(player, message, mission.status);
         });
 
         this.nextEvent();
@@ -472,7 +476,7 @@ module.exports = class Game {
         ladyEvent.status = "DONE";
         const bad = isBad(this.state.playerRoles.get(ladyTarget));
         const message = bad ? `${ladyTarget} is bad` : `${ladyTarget} is good`;
-        this.state.messages.set(lady, message);
+        this.setMsg(lady, message, "LADY");
         this.nextEvent();
         this.state.lady = ladyTarget;
         return true;
