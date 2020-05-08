@@ -268,8 +268,8 @@ module.exports = class Game {
         return players;
     }
 
-    setMsg(name, msg, type) {
-        this.state.messages.set(name, { text: msg, type: type });
+    setMsg(name, msg, type, misc) {
+        this.state.messages.set(name, { text: msg, type: type, misc: misc });
     }
 
     start(name) {
@@ -309,7 +309,7 @@ module.exports = class Game {
             let allroles = [ ...this.state.playerRoles.values() ];
             shuffle(allroles);
             msg += allroles.join(", ");
-            this.setMsg(name, msg, "ROLES");
+            this.setMsg(name, msg, "ROLES", role);
         });
         return true;
     }
