@@ -279,6 +279,8 @@ module.exports = class Game {
         const events = this.generateEvents();
         if (!roles) return false;
         if (!events) return false;
+        let maxProposals = [...roles.values()].filter(r => isBad(r)).length + 1;
+        maxProposals = Math.max(5, maxProposals);
         this.state = {
             events: events,
             playerRoles: roles,
@@ -289,7 +291,7 @@ module.exports = class Game {
             messages: new Map(),
             gameState: "PROPOSING",
             proposalNum: 1,
-            maxProposals: [...roles.values()].filter(r => isBad(r)).length + 1,
+            maxProposals: maxProposals
             votersFor: [],
             votersAgainst: []
         };
