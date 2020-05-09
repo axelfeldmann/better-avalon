@@ -27,11 +27,7 @@ class Game extends Component {
     }
 
     updateGameState(gameState) {
-
-        console.log(gameState);
-        
-        let freshUpdate = (!!this.state.gameState) && 
-                          (gameState.message.type !== this.state.gameState.message.type);
+        let freshUpdate = (!!this.state.gameState);
         this.setState(Object.assign({}, { gameState, freshUpdate }));
     }
 
