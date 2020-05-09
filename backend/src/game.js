@@ -291,7 +291,7 @@ module.exports = class Game {
             messages: new Map(),
             gameState: "PROPOSING",
             proposalNum: 1,
-            maxProposals: maxProposals
+            maxProposals: maxProposals,
             votersFor: [],
             votersAgainst: []
         };
