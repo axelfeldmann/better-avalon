@@ -157,10 +157,11 @@ class Controls extends Component {
 		let gameState = this.props.gameState;
 		const me = auth0Client.getProfile().nickname;
 		const isHost = gameState.host === me;
-		const leaveButton = gameState.state === "WAITING" && !isHost;
-		const endButton = isHost;
+		const leaveButton = (gameState.state === "WAITING" ||
+                             gameState.state === "GOODWINS" ||
+                             gameState.state === "BADWINS") && !isHost;
 		const mainControl = this.getMainControl(me, gameState);
-		if (!leaveButton && !endButton && !mainControl){
+		if (!leaveButton && !mainControl){
 			return <div> </div>;
 		}
 	    return (

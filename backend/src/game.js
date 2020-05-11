@@ -209,10 +209,21 @@ module.exports = class Game {
     }
 
     removePlayer(name) {
-        assert(this.players.has(name));
+        if (!this.players.has(name)) {
+            return false;
+        }
+
+        const gameState = this.state.gameState;
+        if ((gameState !== "GOODWINS") &&
+            (gameState !== "BADWINS") &&
+            (gameState !== "WAITING")) {
+            return false;
+        }
+
         if (this.host === name) {
             return false;
         }
+
         this.nicknames.deleteNickname(name);
         this.players.delete(name);
         this.broadcast();
