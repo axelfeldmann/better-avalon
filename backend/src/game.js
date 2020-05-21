@@ -24,43 +24,6 @@ function shuffle(array) {
     return array;
 }
 
-function getRoles(numPlayers){
-    switch(numPlayers){
-        case 1:
-            return ["Merlin"];
-        case 2:
-            return getRoles(1).concat(["Morgana"]);
-        case 3:
-            return getRoles(2).concat(["Percival"]);
-        case 4:
-            return getRoles(3).concat(["Townie"]);
-        case 5:
-            return getRoles(4).concat(["Mordred"]);
-        case 6:
-            return getRoles(5).concat(["Townie"]);
-        case 7:
-            return ["Merlin", "Morgana", "Percival", "Mordred", "Guinevere", "Bad Lancelot", "Good Lancelot"];
-        case 8:
-            return getRoles(7).concat(["Townie"]);
-        case 9:
-            return getRoles(8).concat(["Oberon"]);
-        case 10:
-            return getRoles(9).concat(["Townie"]);
-        case 11:
-            return getRoles(10).concat(["Dean Kamen"]);
-        case 12:
-            return getRoles(11).concat(["Broberon"]);
-        case 13:
-            return getRoles(12).concat(["Townie"]);
-        case 14:
-            return getRoles(13).concat(["Bad Townie"]);
-        case 15:
-            return getRoles(14).concat(["Townie"]);
-        default:
-            return undefined;
-    }
-}
-
 function mission(numPlayers, failsRequired) {
     return {
         type: "MISSION",
@@ -107,29 +70,6 @@ function generateEvents(numPlayers) {
             return [oneFail(4), oneFail(5), oneFail(5), twoFail(6), oneFail(6), twoFail(7), oneFail(7)];
         default:
             return undefined;
-    }
-}
-
-function roleSees(role){
-    switch(role){
-        case "Merlin":
-            return ["Morgana", "Bad Lancelot", "Oberon", "Broberon", "Bad Townie", "Dean Kamen"];
-        case "Morgana":
-            return ["Bad Lancelot", "Bad Townie", "Mordred"];
-        case "Mordred":
-            return ["Morgana", "Bad Lancelot", "Bad Townie"];
-        case "Bad Lancelot":
-            return ["Mordred", "Morgana", "Bad Townie"];
-        case "Bad Townie":
-            return ["Mordred", "Morgana", "Bad Lancelot"];
-        case "Oberon":
-            return ["Broberon"];
-        case "Percival":
-            return ["Merlin", "Morgana"];
-        case "Guinevere":
-            return ["Good Lancelot", "Bad Lancelot"];
-        default:
-            return [];
     }
 }
 
@@ -182,7 +122,83 @@ module.exports = class Game {
         this.state = { gameState : "WAITING" };
         this.nicknames = new Nicknames();
         this.state.waiting = [ host ];
+        this.use_ferlin = false; //later this will be determined by a button
     }
+
+    // moved over
+    getRoles(numPlayers){
+        switch(numPlayers){
+            case 1:
+                return ["Merlin"];
+            case 2:
+                return getRoles(1).concat(["Morgana"]);
+            case 3:
+                return getRoles(2).concat(["Percival"]);
+            case 4:
+                return getRoles(3).concat(["Townie"]);
+            case 5:
+                return getRoles(4).concat(["Mordred"]);
+            case 6:
+                return getRoles(5).concat(["Townie"]);
+            case 7:
+                return ["Merlin", "Morgana", "Percival", "Mordred", "Guinevere", "Bad Lancelot", "Good Lancelot"];
+            case 8:
+                if(this.use_ferlin) {
+                    return getRoles(7).concat(["Ferlin"]);
+                }
+                return getRoles(7).concat(["Townie"]);
+            case 9:
+                return getRoles(8).concat(["Oberon"]);
+            case 10:
+                return getRoles(9).concat(["Townie"]);
+            case 11:
+                return getRoles(10).concat(["Dean Kamen"]);
+            case 12:
+                return getRoles(11).concat(["Broberon"]);
+            case 13:
+                return getRoles(12).concat(["Townie"]);
+            case 14:
+                return getRoles(13).concat(["Bad Townie"]);
+            case 15:
+                return getRoles(14).concat(["Townie"]);
+            default:
+                return undefined;
+        }
+    }
+
+    roleSees(my_role) {
+
+        let role_sight_list = {
+            "Merlin":  ["Morgana", "Bad Lancelot", "Oberon", "Broberon", "Bad Townie", "Dean Kamen"],
+            "Morgana": ["Bad Lancelot", "Bad Townie", "Mordred"],
+            "Mordred": ["Morgana", "Bad Lancelot", "Bad Townie"],
+            "Bad Lancelot": ["Mordred", "Morgana", "Bad Townie"],
+            "Bad Townie": ["Mordred", "Morgana", "Bad Lancelot"],
+            "Oberon": ["Broberon"],
+            "Percival": ["Merlin", "Morgana"],
+            "Guinevere": ["Good Lancelot", "Bad Lancelot"],
+        }
+
+        let allroles = [ ...this.state.playerRoles.values() ]
+
+        if(my_role=="Ferlin") {
+            let merlin_sees = roleSees("Merlin").length
+            allroles = allroles.filter((role) => role !== "Ferlin")
+            shuffle(allroles)
+            return roles.slice(0, merlin_sees)
+        }
+
+        my_role_sight_list = role_sight_list[my_role]
+
+        if(my_role_sight_list === undefined) { // I don't see anyone
+            return []
+        }
+
+        return my_role_sight_list.filter((role) => allroles.includes(role))
+
+    }
+
+    //previously in game class
 
     validNickname(nickname){
         return (nickname.length) > 4 && (nickname.length < 15);
@@ -266,11 +282,14 @@ module.exports = class Game {
         let roles = getRoles(this.players.size);
         shuffle(roles);
         let roleMap = new Map();
+        let revRoleMap = new Map();
+
         let i = 0;
         this.players.forEach((playerObj, name) => {
-            roleMap.set(name, roles[i++]);
+            roleMap.set(name, roles[i]);
+            revRoleMap.set(roles[i++], name)
         });
-        return roleMap;
+        return [roleMap, revRoleMap];
     }
 
     assignOrder() {
@@ -286,7 +305,7 @@ module.exports = class Game {
     start(name) {
         if (name !== this.host) return false;
         const order = this.assignOrder();
-        const roles = this.assignRoles();
+        const [roles, revroles] = this.assignRoles();
         const events = this.generateEvents();
         if (!roles) return false;
         if (!events) return false;
@@ -311,10 +330,13 @@ module.exports = class Game {
             const role = this.state.playerRoles.get(name);
             
             let seenRoles = roleSees(role);
-            let seenPlayers = this.state.order.filter((otherPlayer) => {
+            /*let seenPlayers = this.state.order.filter((otherPlayer) => {
                 const otherPlayerRole = this.state.playerRoles.get(otherPlayer);
-                return seenRoles.includes(otherPlayerRole);
-            });
+                return seenRoles.includes(otherPlayerRole); */
+
+            // my replacement now that roleSees doesn't output players who are not there
+            let seenPlayers = seenRoles.map((role) => revroles.get(role))
+
             seenPlayers = seenPlayers.map(username => this.nicknames.getNickname(username));
             let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.join(", ") : "no one";
             let msg = "Your role is " + role + "\nYou see: " + seenPlayersStr + "\n";
