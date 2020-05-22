@@ -40,31 +40,31 @@ function getRoles(numPlayers, use_ferlin){
         case 2:
             return ["Merlin, Morgana"];
         case 3:
-            return getRoles(2).concat(["Percival"]);
+            return getRoles(2, use_ferlin).concat(["Percival"]);
         case 4:
-            return getRoles(3).concat(use_ferlin ? ["Ferlin"] : ["Townie"]);
+            return getRoles(3, use_ferlin).concat(use_ferlin ? ["Ferlin"] : ["Townie"]);
         case 5:
-            return getRoles(4).concat(["Mordred"]);
+            return getRoles(4, use_ferlin).concat(["Mordred"]);
         case 6:
-            return getRoles(5).concat(["Townie"]);
+            return getRoles(5, use_ferlin).concat(["Townie"]);
         case 7:
             return ["Merlin", "Morgana", "Percival", "Mordred", "Guinevere", "Bad Lancelot", "Good Lancelot"];
         case 8:
-            return getRoles(7).concat(use_ferlin ? ["Ferlin"] : ["Townie"]);
+            return getRoles(7, use_ferlin).concat(use_ferlin ? ["Ferlin"] : ["Townie"]);
         case 9:
-            return getRoles(8).concat(["Oberon"]);
+            return getRoles(8, use_ferlin).concat(["Oberon"]);
         case 10:
-            return getRoles(9).concat(["Townie"]);
+            return getRoles(9, use_ferlin).concat(["Townie"]);
         case 11:
-            return getRoles(10).concat(["Dean Kamen"]);
+            return getRoles(10, use_ferlin).concat(["Dean Kamen"]);
         case 12:
-            return getRoles(11).concat(["Broberon"]);
+            return getRoles(11, use_ferlin).concat(["Broberon"]);
         case 13:
-            return getRoles(12).concat(["Townie"]);
+            return getRoles(12, use_ferlin).concat(["Townie"]);
         case 14:
-            return getRoles(13).concat(["Bad Townie"]);
+            return getRoles(13, use_ferlin).concat(["Bad Townie"]);
         case 15:
-            return getRoles(14).concat(["Townie"]);
+            return getRoles(14, use_ferlin).concat(["Townie"]);
         default:
             return undefined;
     }
