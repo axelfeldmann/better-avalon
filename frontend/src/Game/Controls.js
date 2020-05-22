@@ -33,6 +33,12 @@ const Mission = ({gameState, action, disabled}) => {
 	);
 }
 
+function check_ferlin_disabled(props) {
+	const no_ferlin = [2, 3, 7];
+	const num_players = props.gameState.players.length;
+	return no_ferlin.includes(num_players);
+}
+
 // In development
 
 class Waiting extends Component {
@@ -44,24 +50,16 @@ class Waiting extends Component {
 		};
 	}
 
-	check_ferlin_disabled() {
-		const no_ferlin = [2, 3, 7];
-		const num_players = this.props.gameState.players.length;
-		return no_ferlin.includes(num_players);
-	}
+	static getDerivedStateFromProps(props, state) {
 
-	getDerivedStateFromProps(props, state) {
-		const no_ferlin = [2, 3, 7];
-		const num_players = props.gameState.players.length;
-
-		if(no_ferlin.includes(num_players)) {
+		if(check_ferlin_disabled(props)) {
 			return {ferlin: false};
 		}
 		return null;
 	}
 
 	toggle(){
-		if(this.check_ferlin_disabled) {
+		if(!check_ferlin_disabled(this.props)) {
 			this.setState({ferlin: !this.state.ferlin});
 		}
 	}
