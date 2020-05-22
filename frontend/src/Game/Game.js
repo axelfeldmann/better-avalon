@@ -7,7 +7,6 @@ import Controls from "./Controls";
 import Message from "./Message";
 import Banner from "./Banner";
 import axios from "axios";
-import Sound from "react-sound";
 
 class Game extends Component {
 
@@ -20,6 +19,7 @@ class Game extends Component {
 
         // this is terrible but necessary for decent development
         this.eventSource = new EventSourcePolyfill("/api/mygame", { headers });
+        this.boop = new Audio("boop.mp3");
 
         this.state = {
             gameState: null
@@ -31,6 +31,13 @@ class Game extends Component {
         if (this.state.gameState) {
             freshUpdate = (this.state.gameState.state !== gameState.state);
         }
+
+        // sus lines, but I got rid of the sound component
+        if (freshUpdate) {
+            this.boop.play();
+            setTimeout(() => this.setState({ freshUpdate: false}), 500);
+        }
+
         this.setState(Object.assign({}, { gameState, freshUpdate }));
     }
 
@@ -66,12 +73,9 @@ class Game extends Component {
         const freshUpdate = this.state.freshUpdate;
         const gameState = this.state.gameState;
         const isHost = gameState.host === auth0Client.getProfile().nickname;
+
         return (
             <div className = "container-fluid">
-                <Sound url="boop.mp3" 
-                       playStatus={freshUpdate ? Sound.status.PLAYING : Sound.status.STOPPED}
-                       onFinishedPlaying={() => this.setState({ freshUpdate: false })}
-                       />
                 <Message gameState = { gameState } freshUpdate = { freshUpdate }/>
                 <Banner gameState = {gameState}/>
                 <Controls gameState = { gameState }/>
