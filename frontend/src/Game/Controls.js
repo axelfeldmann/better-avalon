@@ -33,6 +33,62 @@ const Mission = ({gameState, action, disabled}) => {
 	);
 }
 
+// In development
+
+class Waiting extends Component {
+
+	constructor(props){
+		super(props);
+		this.state = {
+			ferlin: false
+		};
+	}
+
+	check_ferlin_disabled() {
+		const no_ferlin = [2, 3, 7];
+		const num_players = this.props.gameState.players.length;
+		return no_ferlin.includes(num_players);
+	}
+
+	getDerivedStateFromProps(props, state) {
+		const no_ferlin = [2, 3, 7];
+		const num_players = props.gameState.players.length;
+
+		if(no_ferlin.includes(num_players)) {
+			return {ferlin: false};
+		}
+		return null;
+	}
+
+	toggle(){
+		if(this.check_ferlin_disabled) {
+			this.setState({ferlin: !this.state.ferlin});
+		}
+	}
+
+	render() {
+		const ferlinClassName = this.state.ferlin ? "btn btn-success btn-lg mt-1" : "btn btn-light btn-lg mt-1";
+
+		return(
+			<div>
+				<button key = "ferlin" 
+						disabled={this.props.disabled}
+						className = {ferlinClassName}
+						onClick = {() => {this.toggle()}}> 
+			 		Include Ferlin
+				</button>
+
+				<button key = "start" 
+						disabled={this.props.disabled}
+						className = "btn btn-info btn-lg ml-2 mt-1" 
+						onClick = {() => this.props.action(this.state.ferlin)}> 
+			 		Start Game
+				</button>
+			</div>
+		)
+	}
+}
+
 class Proposing extends Component {
 
 	constructor(props){
@@ -120,33 +176,33 @@ class Controls extends Component {
 	}
 
 	getMainControl(me, gameState){
+		console.log(gameState);
 		const active = gameState.waiting.includes(me);
 		if (!active) return undefined;
 		switch (gameState.state) {
 			case "WAITING":
-				return (<button key = "start" 
-								disabled={ this.state.buttonsDisabled }
-								className = "btn btn-info btn-block mb-1" 
-								onClick = {() => {this.action("START")}}> 
-					 		Start Game
-						</button>);
+				return (<Waiting key='waiting'
+								gameState = {gameState}
+								disabled = {this.state.buttonsDisabled}
+								action = {(ferlin) => this.action("START", ferlin)}
+						/>);
 			case "PROPOSING":
 				return (<Proposing key = "proposing" 
-									 gameState = {gameState}
-									 disabled = {this.state.buttonsDisabled}
-									 action = {(proposal) => this.action("PROPOSAL", proposal)}
+								gameState = {gameState}
+								disabled = {this.state.buttonsDisabled}
+								action = {(proposal) => this.action("PROPOSAL", proposal)}
 						/>);
 			case "VOTING":
 				return (<Voting key = "voting"
-								  gameState = {gameState}
-								  disabled = {this.state.buttonsDisabled}
-								  action = {(vote) => this.action("VOTE", vote)}
+								gameState = {gameState}
+								disabled = {this.state.buttonsDisabled}
+								action = {(vote) => this.action("VOTE", vote)}
 						/>);
 			case "MISSION":
 				return (<Mission key = "mission"
- 							   gameState = {gameState}
- 							   disabled = {this.state.buttonsDisabled}
-							   action = {(passfail) => this.action("PASSFAIL", passfail)}
+ 							   	gameState = {gameState}
+ 							   	disabled = {this.state.buttonsDisabled}
+							   	action = {(passfail) => this.action("PASSFAIL", passfail)}
 						 />);
 			default:
 				return undefined;

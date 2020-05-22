@@ -33,6 +33,43 @@ function mission(numPlayers, failsRequired) {
     };
 }
 
+function getRoles(numPlayers, use_ferlin){
+    switch(numPlayers){
+        case 1:
+            return use_ferlin ? ["Ferlin"] : ["Merlin"]
+        case 2:
+            return ["Merlin, Morgana"];
+        case 3:
+            return getRoles(2).concat(["Percival"]);
+        case 4:
+            return getRoles(3).concat(use_ferlin ? ["Ferlin"] : ["Townie"]);
+        case 5:
+            return getRoles(4).concat(["Mordred"]);
+        case 6:
+            return getRoles(5).concat(["Townie"]);
+        case 7:
+            return ["Merlin", "Morgana", "Percival", "Mordred", "Guinevere", "Bad Lancelot", "Good Lancelot"];
+        case 8:
+            return getRoles(7).concat(use_ferlin ? ["Ferlin"] : ["Townie"]);
+        case 9:
+            return getRoles(8).concat(["Oberon"]);
+        case 10:
+            return getRoles(9).concat(["Townie"]);
+        case 11:
+            return getRoles(10).concat(["Dean Kamen"]);
+        case 12:
+            return getRoles(11).concat(["Broberon"]);
+        case 13:
+            return getRoles(12).concat(["Townie"]);
+        case 14:
+            return getRoles(13).concat(["Bad Townie"]);
+        case 15:
+            return getRoles(14).concat(["Townie"]);
+        default:
+            return undefined;
+    }
+}
+
 const oneFail = (numPlayers) => mission(numPlayers, 1);
 const twoFail = (numPlayers) => mission(numPlayers, 2);
 
@@ -122,53 +159,11 @@ module.exports = class Game {
         this.state = { gameState : "WAITING" };
         this.nicknames = new Nicknames();
         this.state.waiting = [ host ];
-        this.use_ferlin = false; //later this will be determined by a button
-    }
-
-    // moved over
-    getRoles(numPlayers){
-        switch(numPlayers){
-            case 1:
-                return ["Merlin"];
-            case 2:
-                return getRoles(1).concat(["Morgana"]);
-            case 3:
-                return getRoles(2).concat(["Percival"]);
-            case 4:
-                return getRoles(3).concat(["Townie"]);
-            case 5:
-                return getRoles(4).concat(["Mordred"]);
-            case 6:
-                return getRoles(5).concat(["Townie"]);
-            case 7:
-                return ["Merlin", "Morgana", "Percival", "Mordred", "Guinevere", "Bad Lancelot", "Good Lancelot"];
-            case 8:
-                if(this.use_ferlin) {
-                    return getRoles(7).concat(["Ferlin"]);
-                }
-                return getRoles(7).concat(["Townie"]);
-            case 9:
-                return getRoles(8).concat(["Oberon"]);
-            case 10:
-                return getRoles(9).concat(["Townie"]);
-            case 11:
-                return getRoles(10).concat(["Dean Kamen"]);
-            case 12:
-                return getRoles(11).concat(["Broberon"]);
-            case 13:
-                return getRoles(12).concat(["Townie"]);
-            case 14:
-                return getRoles(13).concat(["Bad Townie"]);
-            case 15:
-                return getRoles(14).concat(["Townie"]);
-            default:
-                return undefined;
-        }
     }
 
     roleSees(my_role) {
 
-        let role_sight_list = {
+        let role_sight_dict = {
             "Merlin":  ["Morgana", "Bad Lancelot", "Oberon", "Broberon", "Bad Townie", "Dean Kamen"],
             "Morgana": ["Bad Lancelot", "Bad Townie", "Mordred"],
             "Mordred": ["Morgana", "Bad Lancelot", "Bad Townie"],
@@ -182,13 +177,13 @@ module.exports = class Game {
         let allroles = [ ...this.state.playerRoles.values() ]
 
         if(my_role=="Ferlin") {
-            let merlin_sees = roleSees("Merlin").length
+            let merlin_sees = this.roleSees("Merlin").length
             allroles = allroles.filter((role) => role !== "Ferlin")
             shuffle(allroles)
-            return roles.slice(0, merlin_sees)
+            return allroles.slice(0, merlin_sees)
         }
 
-        my_role_sight_list = role_sight_list[my_role]
+        let my_role_sight_list = role_sight_dict[my_role]
 
         if(my_role_sight_list === undefined) { // I don't see anyone
             return []
@@ -278,18 +273,18 @@ module.exports = class Game {
         return generateEvents(numPlayers);
     }
 
-    assignRoles() {
-        let roles = getRoles(this.players.size);
+    assignRoles(use_ferlin) {
+        let roles = getRoles(this.players.size, use_ferlin);
         shuffle(roles);
-        let roleMap = new Map();
-        let revRoleMap = new Map();
+        let playersToRoles = new Map();
+        let rolesToPlayers = new Map();
 
         let i = 0;
         this.players.forEach((playerObj, name) => {
-            roleMap.set(name, roles[i]);
-            revRoleMap.set(roles[i++], name)
+            playersToRoles.set(name, roles[i]);
+            rolesToPlayers.set(roles[i++], name)
         });
-        return [roleMap, revRoleMap];
+        return [playersToRoles, rolesToPlayers];
     }
 
     assignOrder() {
@@ -302,10 +297,10 @@ module.exports = class Game {
         this.state.messages.set(name, { text: msg, type: type, misc: misc });
     }
 
-    start(name) {
+    start(name, use_ferlin) {
         if (name !== this.host) return false;
         const order = this.assignOrder();
-        const [roles, revroles] = this.assignRoles();
+        const [roles, rolesToPlayers] = this.assignRoles(use_ferlin);
         const events = this.generateEvents();
         if (!roles) return false;
         if (!events) return false;
@@ -329,22 +324,22 @@ module.exports = class Game {
         this.players.forEach((playerObj, name) => {
             const role = this.state.playerRoles.get(name);
             
-            let seenRoles = roleSees(role);
-            /*let seenPlayers = this.state.order.filter((otherPlayer) => {
-                const otherPlayerRole = this.state.playerRoles.get(otherPlayer);
-                return seenRoles.includes(otherPlayerRole); */
+            let seenRoles = this.roleSees(role);
 
-            // my replacement now that roleSees doesn't output players who are not there
-            let seenPlayers = seenRoles.map((role) => revroles.get(role))
+            let seenPlayers = seenRoles.map((role) => rolesToPlayers.get(role))
 
             seenPlayers = seenPlayers.map(username => this.nicknames.getNickname(username));
             let seenPlayersStr = (seenPlayers.length > 0) ? seenPlayers.join(", ") : "no one";
-            let msg = "Your role is " + role + "\nYou see: " + seenPlayersStr + "\n";
+
+            // Make sure Ferlin thinks they are Merlin
+            let seen_role = role==="Ferlin" ? "Merlin" : role
+
+            let msg = "Your role is " + seen_role + "\nYou see: " + seenPlayersStr + "\n";
             msg += "All the roles are: ";
             let allroles = [ ...this.state.playerRoles.values() ];
             shuffle(allroles);
             msg += allroles.join(", ");
-            this.setMsg(name, msg, "ROLES", role);
+            this.setMsg(name, msg, "ROLES", seen_role);
         });
         return true;
     }
@@ -521,7 +516,7 @@ module.exports = class Game {
         let success = true;
         switch (body.type) {
             case "START":
-                success = this.start(name);
+                success = this.start(name, body.arg); //body.arg contains ferlin information
                 break;
             case "PROPOSAL":
                 success = this.handleProposal(name, body.arg);
